@@ -1,5 +1,5 @@
 # beehive-service-netaas
-__beehive-service-netaas__ is the project that contains the network as a service components of the nivola cmp platform. 
+__beehive-service-netaas__ is the project that contains the network as a service components of the Nivola CMP platform. 
 
 All code is written using python and support versions 3.7.x>
 

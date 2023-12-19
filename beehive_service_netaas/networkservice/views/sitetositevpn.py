@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
+# (C) Copyright 2018-2023 CSI-Piemonte
 
 from flasgger import Schema
 from beecell.simple import id_gen
@@ -14,8 +15,8 @@ from beehive_service_netaas.networkservice import ApiNetworkGateway, ApiNetworkS
 
 class NetworkSiteToSiteVpnAPI(ApiView):
     @staticmethod
-    def register_api(module, rules=None, **kwargs):
-        base = module.base_path + '/networkservices/sitetositevpn'
+    def register_api(module, dummyrules=None, **kwargs):
+        base = module.base_path + "/networkservices/sitetositevpn"
         rules = [
             # ('%s/describeinternetgateways' % base, 'GET', DescribeInternetGateways, {}),
             # ('%s/createinternetgateway' % base, 'POST', CreateInternetGateway, {}),

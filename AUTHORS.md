@@ -1,5 +1,8 @@
-beehive-service-netaas is written and maintained by: 
+beehive-service-netaas is written and maintained by:
 
-* Sergio Tonani
+* Alessandro Morè
 * Davide Sacchetto
 * Filippo Vallero
+* Gianni Doria
+* Pietro Pilolli
+* Sergio Tonani

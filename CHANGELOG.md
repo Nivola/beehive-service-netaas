@@ -1,5 +1,33 @@
 # Changelog
 
+## Version 1.15.0
+
+* Fixed ...
+  * minor fixes
+
+## Version 1.14.0
+
+* Added ...
+  * availability zone check in load balancer update
+* Fixed ...
+  * minor fixes
+  * some schemas in swagger descriptions
+
+## Version 1.13.0
+
+* Added ...
+  * load balancer draft management
+  * ssh gateway management
+  * improvements in run-state management
+* Fixed ...
+  * minor fixes
+
+## Version 1.12.0
+
+* Fixed ...
+  * elastic lib updated
+  * swagger updated  schemas declarations for security group, subnet and vpc
+
 ## Version 1.11.0 (oct 11, 2022)
 * Various bugfixes
 
