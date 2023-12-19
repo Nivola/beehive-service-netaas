@@ -1,7 +1,12 @@
+.*
 *.py[co]
-_build/
+**/*.py[co]
+.settings/
+.vscode/
+build/
 *.so
 .project
 .pydevproject
+tags
 .idea/
-.manage.*
+.scannerwork/
