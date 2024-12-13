@@ -1,11 +1,10 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2023 CSI-Piemonte
-
-from beehive_service.controller import ServiceController
+# (C) Copyright 2018-2024 CSI-Piemonte
+from beehive_service.controller import ServiceController, ApiServiceDefinition
 from flasgger import Schema
-from beehive.common.apimanager import ApiView
+from beehive.common.apimanager import ApiView, ApiManagerError
 from beehive.common.data import operation
 from beehive_service.model.base import SrvStatusType
 from beehive_service.views import ServiceApiView
@@ -16,6 +15,7 @@ from beehive_service.plugins.computeservice.controller import (
     ApiComputeVPC,
     ApiComputeService,
 )
+from beehive_service_netaas.networkservice.validation import validate_network
 
 
 class InstanceTagSetResponseSchema(Schema):
@@ -277,7 +277,7 @@ class DescribeVpcs(ServiceApiView):
     responses = ServiceApiView.setResponses({200: {"description": "success", "schema": DescribeVpcsResponseSchema}})
     response_schema = DescribeVpcsResponseSchema
 
-    def get(self, controller, data, *args, **kwargs):
+    def get(self, controller: ServiceController, data, *args, **kwargs):
         data_search = {}
         data_search["size"] = data.get("Nvl_MaxResults", 10)
         data_search["page"] = int(data.get("Nvl_NextToken", 0))
@@ -345,6 +345,7 @@ class CreateVpcApiParamRequestSchema(Schema):
         required=False,
         example="###.###.###.###/##",
         missing=None,
+        validate=validate_network,
         description="base vpc cidr block",
     )
     InstanceTenancy = fields.String(
@@ -393,12 +394,19 @@ class CreateVpc(ServiceApiView):
         account, parent_plugin = self.check_parent_service(
             controller, account_id, plugintype=ApiComputeService.plugintype
         )
-
+        service_definition: ApiServiceDefinition
         # get vpc definition
         if service_definition_id is None:
             service_definition = controller.get_default_service_def(ApiComputeVPC.plugintype)
         else:
             service_definition = controller.get_service_def(service_definition_id)
+
+        # TODO CHECK Account has definition
+        ok, desc = account.can_instantiate(service_definition)
+        if not ok:
+            raise ApiManagerError(
+                f" {desc}: account {account.name} cannot use definition {service_definition.bane}", code=400
+            )
 
         # create service
         data["computeZone"] = parent_plugin.resource_uuid

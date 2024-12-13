@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 from flasgger import Schema
 from six import ensure_text
@@ -25,6 +25,7 @@ from beehive_service.service_util import (
     __RULE_GROUP_EGRESS__,
 )
 from beehive.common.data import operation
+from beehive_service.controller import ServiceController
 
 
 class InstanceTagSetResponseSchema(Schema):
@@ -767,7 +768,7 @@ class CreateSecurityGroup(ServiceApiView):
         # self.service_exist(controller, sg_name, ApiComputeSecurityGroup.plugintype)
 
         # get vpc service
-        inst_vpc = controller.get_service_type_plugin(vpc_id, plugin_class=ApiComputeVPC, details=False)
+        inst_vpc: ApiComputeVPC = controller.get_service_type_plugin(vpc_id, plugin_class=ApiComputeVPC, details=False)
         account_id = inst_vpc.instance.account_id
 
         # check account
@@ -898,11 +899,11 @@ class DeleteSecurityGroup(ServiceApiView):
     )
     response_schema = DeleteSecurityGroupApiResponseSchema
 
-    def delete(self, controller, data, *args, **kwargs):
+    def delete(self, controller: ServiceController, data, *args, **kwargs):
         data = data.get("security_group")
         sg_uuid = data.get("GroupName")
 
-        type_plugin = controller.get_service_type_plugin(sg_uuid)
+        type_plugin = controller.get_service_type_plugin(sg_uuid, plugin_class=ApiComputeSecurityGroup)
         type_plugin.delete()
 
         res = {
@@ -1135,7 +1136,7 @@ class AuthorizeSecurityGroupIngress(ServiceApiView):
         data = data.get("rule")
         sg_uuid = data.get("GroupName", None)
 
-        type_plugin = controller.get_service_type_plugin(sg_uuid)
+        type_plugin: ApiComputeSecurityGroup = controller.get_service_type_plugin(sg_uuid)
         return_value = type_plugin.aws_create_rule(type_plugin.instance, data, __RULE_GROUP_INGRESS__)
 
         res = {

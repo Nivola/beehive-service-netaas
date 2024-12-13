@@ -1,23 +1,20 @@
-# SPDX-License-Identifier: GPL-3.0-or-later
+# SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2020-2021 Regione Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 from flasgger import Schema
 from flasgger.marshmallow_apispec import fields
 from marshmallow.validate import OneOf
-from beehive_service_netaas.networkservice.controller import (
-    ApiNetworkService,
-    ApiSshGateway,
-)
+from beehive.common.apimanager import ApiView, ApiManagerError
+from beehive.common.data import operation
+from beecell.swagger import SwaggerHelper
+from beehive_service.views import ServiceApiView
+from beehive_service_netaas.networkservice.controller import ApiNetworkService, ApiSshGateway, ServiceController
 from beehive_service_netaas.networkservice.helper.sshgateway_helper import (
     SshGatewayHelper,
     SshGatewayHelperError,
     SshGwType,
 )
-from beehive_service.views import ServiceApiView
-from beehive.common.apimanager import ApiView, ApiManagerError
-from beehive.common.data import operation
-from beecell.swagger import SwaggerHelper
 
 
 class CreateSshGatewayConfResponseNestedSchema(Schema):
@@ -45,7 +42,7 @@ class CreateSshGatewayConfRequestNestedSchema(Schema):
     CreateSshGatewayConfRequestNestedSchema
     """
 
-    name = fields.String(required=True, default="ssh gateway name")
+    name = fields.String(required=False, default="ssh gateway name")
     desc = fields.String(required=False, default="ssh gateway description")
     gw_type = fields.String(
         validate=OneOf(
@@ -116,10 +113,10 @@ class CreateSshGatewayConf(ServiceApiView):
         """
         inner_data = data.get("configuration")
         service_definition_id = inner_data.get("service_definition_id")
-        name = inner_data.get("name")
-        desc = inner_data.get("description", name)
-        gw_type = inner_data.get("gw_type", None)
-        dest_uuid = inner_data.get("dest_uuid", None)
+        name: str = inner_data.get("name", None)
+        desc: str = inner_data.get("description", name)
+        gw_type: str = inner_data.get("gw_type", None)
+        dest_uuid: str = inner_data.get("dest_uuid", None)
         allowed_ports = inner_data.pop("allowed_ports", None)
         forbidden_ports = inner_data.pop("forbidden_ports", None)
 
@@ -132,16 +129,21 @@ class CreateSshGatewayConf(ServiceApiView):
             raise ApiManagerError(str(helper_error)) from helper_error
 
         # get definition
-        service_definition = controller.get_default_service_def(ApiSshGateway.plugintype)
+        # service_definition = controller.get_default_service_def(ApiSshGateway.plugintype)
         if service_definition_id is None:
             service_definition = controller.get_default_service_def(ApiSshGateway.plugintype)
         else:
             service_definition = controller.get_service_def(service_definition_id)
 
         # check account
-        account, parent_plugin = self.check_parent_service(
+        _account, parent_plugin = self.check_parent_service(
             controller, dest_account.oid, plugintype=ApiNetworkService.plugintype
         )
+
+        # generate name if not given
+        if name is None:
+            dest = controller.get_service_instance(dest_uuid)
+            name = gw_type.replace("_", "-") + "-" + dest.name + "-" + str(abs(hash(str(parsed_ports_set))))
 
         # apply updated params
         inner_data["parsed_ports_set"] = list(parsed_ports_set)  # convert otherwise not json serializable
@@ -154,6 +156,7 @@ class CreateSshGatewayConf(ServiceApiView):
             service_definition.oid,
             dest_account.oid,
             name=name,
+            name_max_length=60,
             desc=desc,
             parent_plugin=parent_plugin,
             instance_config=data,
@@ -399,12 +402,12 @@ class DeleteSshGatewayConf(ServiceApiView):
         {200: {"description": "success", "schema": DeleteSshGatewayConfResponseSchema}}
     )
 
-    def delete(self, controller, data, *args, **kwargs):
+    def delete(self, controller: ServiceController, data, *args, **kwargs):
         """
         delete ssh gateway configuration
         """
         gateway_id = data.pop("ssh_gateway_id")
-        type_plugin = controller.get_service_type_plugin(gateway_id)
+        type_plugin = controller.get_service_type_plugin(gateway_id, plugin_class=ApiSshGateway)
         type_plugin.delete()
 
         res = {
@@ -503,6 +506,10 @@ class ActivateSshGatewayConf(ServiceApiView):
 
 
 class NetworkSshGatewayAPI(ApiView):
+    """
+    ssh gateway ApiView
+    """
+
     @staticmethod
     def register_api(module, dummyrules=None, **kwargs):
         base = module.base_path + "/networkservices/ssh_gateway"

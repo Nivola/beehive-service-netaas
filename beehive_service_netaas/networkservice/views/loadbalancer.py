@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 from flasgger import Schema
 from beecell.types.type_dict import dict_set
@@ -508,9 +508,9 @@ class DeleteHealthMonitor(ServiceApiView):
     )
     response_schema = DeleteHealthMonitorResponseSchema
 
-    def delete(self, controller, data, *args, **kwargs):
+    def delete(self, controller: ServiceController, data, *args, **kwargs):
         monitor_id = data.pop("healthMonitorId")
-        type_plugin = controller.get_service_type_plugin(monitor_id)
+        type_plugin = controller.get_service_type_plugin(monitor_id, plugin_class=ApiNetworkHealthMonitor)
         type_plugin.delete()
 
         res = {
@@ -936,7 +936,7 @@ class DeleteTargetGroup(ServiceApiView):
 
     def delete(self, controller, data, *args, **kwargs):
         target_group_id = data.pop("targetGroupId")
-        type_plugin = controller.get_service_type_plugin(target_group_id)
+        type_plugin = controller.get_service_type_plugin(target_group_id, plugin_class=ApiNetworkTargetGroup)
         type_plugin.delete()
 
         res = {
@@ -1788,9 +1788,9 @@ class DeleteListener(ServiceApiView):
     responses = SwaggerApiView.setResponses({200: {"description": "success", "schema": DeleteListenerResponseSchema}})
     response_schema = DeleteListenerResponseSchema
 
-    def delete(self, controller, data, *args, **kwargs):
+    def delete(self, controller: ServiceController, data, *args, **kwargs):
         listener_id = data.pop("listenerId")
-        type_plugin = controller.get_service_type_plugin(listener_id)
+        type_plugin = controller.get_service_type_plugin(listener_id, plugin_class=ApiNetworkListener)
         type_plugin.delete()
 
         res = {
@@ -2191,7 +2191,7 @@ class ImportLoadBalancerParamsRequestSchema(Schema):
     DeploymentEnvironment = fields.String(
         required=False,
         allow_none=True,
-        validate=OneOf(["prod", "preprod", "test"]),
+        validate=OneOf(["prod", "preprod", "stage", "test"]),
         description="The environment where the project hosted on target(s) behind the load balancer is deployed",
     )
 
@@ -2393,9 +2393,9 @@ class DeleteLoadBalancer(ServiceApiView):
     )
     response_schema = DeleteLoadBalancerResponseSchema
 
-    def delete(self, controller, data, *args, **kwargs):
+    def delete(self, controller: ServiceController, data, *args, **kwargs):
         load_balancer_id = data.pop("loadBalancerId")
-        type_plugin = controller.get_service_type_plugin(load_balancer_id)
+        type_plugin = controller.get_service_type_plugin(load_balancer_id, plugin_class=ApiNetworkLoadBalancer)
         type_plugin.delete(**data)
 
         res = {

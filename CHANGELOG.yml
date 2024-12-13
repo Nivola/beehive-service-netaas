@@ -1,0 +1,86 @@
+Changelog:
+  -
+    Version: 1.16.1
+    date: 2024-06-04
+    desc: rilascio correttive
+    Added:
+      - validation on network cidr while creating vpc and subnet
+  -
+    Version: 1.16.0
+    date: 2024-03-26
+    desc:
+    Fixed:
+      - Correct error introduced by Black
+      - Add item in view validation array
+      - pylint unused variables
+      - Correct typo
+      - sshgw standard name if not given as parameter
+      - change status to error, upon activate, when destination not found
+      - headers updated
+      - changed manifest
+  -
+    Version: 1.15.3
+    date: 2024-03-11
+    desc: rilascio correttive
+    Fixed:
+      - bastion orchestrator_select_types, type hint
+      - gateway param orchestrator_select_types
+      - fix delete service check service_type_plugin to avoid delete different type service
+  -
+    Version: 1.15.0
+    date:  2025-10-12
+    desc: rilascio funzionalità del prodotto
+    Fixed:
+      - minor fixes
+  -
+    Version: 1.14.0
+    date: 2023-06-22
+    desc: rilascio funzionalità
+    Added:
+      - availability zone check in load balancer update
+    Fixed:
+      - minor fixes
+      - some schemas in swagger descriptions
+  -
+    Version: 1.13.0
+    date: 2023-02-24
+    desc: rilascio funzionalità
+    Added:
+      - load balancer draft management
+      - ssh gateway management
+      - improvements in run-state management
+    Fixed:
+      - minor fixes
+  -
+    Version: 1.12.0
+    date: 2023-01-27
+    desc: rilascio funzionalità
+    Fixed:
+      - elastic lib updated
+      - swagger updated  schemas declarations for security group, subnet and vpc
+  -
+    Version: 1.11.0
+    date: 2022-10-11
+    desc: rilascio funzionalità
+  -
+    Version: 1.2.0
+    date: 2022-02-11
+    desc: rilascio funzionalità
+    Added:
+      - base structure of ElasticIp [start]
+    Fixed:
+    Changed:
+      - migrate Vpc, SecurityGroup and Subnet from ComputeService [start]
+  -
+    Version: 1.1.0
+    date: 2021-06-11
+    desc: rilascio funzionalità
+    Added:
+      - add crud for bastion in ApiNetworkGateway
+    Fixed:
+    Changed:
+      - add check in gateway delete
+  -
+    Version: 1.0.0
+    date: 2020-06-30
+    desc: First production preview release.

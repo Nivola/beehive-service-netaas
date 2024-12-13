@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 from copy import deepcopy
 
@@ -81,7 +81,7 @@ class ApiNetworkService(ApiServiceTypeContainer):
         instance_type_idx = controller.get_service_definition_idx(ApiNetworkService.plugintype)
 
         # get resources
-        zones = []
+        # zones = []
         resources = []
         for entity in entities:
             account_id = str(entity.instance.account_id)
@@ -421,6 +421,11 @@ class ApiNetworkGateway(AsyncApiServiceTypePlugin):
         container_id = self.get_config("container")
         compute_zone = self.get_config("computeZone")
 
+        # orchestrator_select_types_array = None
+        # orchestrator_select_types: str = self.get_config("orchestrator_select_types")
+        # if orchestrator_select_types is not None:
+        #     orchestrator_select_types_array = orchestrator_select_types.split(",")
+
         uplink_vpc = self.get_config("uplink_vpc")
         transport_vpc = self.get_config("transport_vpc")
         primary_zone = self.get_config("primary_zone")
@@ -444,6 +449,7 @@ class ApiNetworkGateway(AsyncApiServiceTypePlugin):
             "name": name,
             "desc": name,
             "orchestrator_tag": "default",
+            # "orchestrator_select_types": orchestrator_select_types_array,
             "container": container_id,
             "compute_zone": compute_zone,
             "uplink_vpc": uplink_vpc,
@@ -843,6 +849,11 @@ class ApiNetworkGateway(AsyncApiServiceTypePlugin):
         key_name = bastion_conf.get("key_name")
         acls = [{"subnet": s} for s in bastion_conf.get("acls").split(",")]
 
+        # orchestrator_select_types_array = None
+        # orchestrator_select_types: str = self.get_config("orchestrator_select_types")
+        # if orchestrator_select_types is not None:
+        #     orchestrator_select_types_array = orchestrator_select_types.split(",")
+
         name = "%s-bastion-01" % account.name
         desc = "bastion %s" % account.name
 
@@ -850,6 +861,7 @@ class ApiNetworkGateway(AsyncApiServiceTypePlugin):
             "name": name,
             "desc": desc,
             "orchestrator_tag": "default",
+            # "orchestrator_select_types": orchestrator_select_types_array,
             "container": container_id,
             "compute_zone": compute_zone,
             "availability_zone": primary_zone,
@@ -864,6 +876,7 @@ class ApiNetworkGateway(AsyncApiServiceTypePlugin):
         uuid = self.instance.resource_uuid
         try:
             data = {"bastion": data}
+            self.logger.debug("create gateway %s bastion - data: %s" % (uuid, data))
             uri = "/v1.0/nrs/provider/bastions"
             res = self.controller.api_client.admin_request("resource", uri, "post", data=data)
             taskid = res.get("taskid", None)
@@ -1701,7 +1714,7 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
     objname = "securitygroup"
 
     class state_enum(object):
-        """enumerate state name esposed by api"""
+        """enumerate state name exposed by api"""
 
         pending = "pending"
         available = "available"
@@ -1748,9 +1761,9 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
         security_group_idx = controller.get_service_instance_idx(ApiNetworkSecurityGroup.plugintype)
 
         # get resources
-        zones = []
+        # zones = []
         resources = []
-        account_id_list = []
+        # account_id_list = []
         vpc_list = []
         for entity in entities:
             account_id = str(entity.instance.account_id)
@@ -1948,8 +1961,8 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
         sg_perm_inst = None
         sg_perm_inst_value = None
         sg_perm_type = "SecurityGroup"
-        sg_perm_user = None
-        vpc_perm_inst = None
+        # sg_perm_user = None
+        # vpc_perm_inst = None
 
         ip_permission_list = data.get("rule").get("IpPermissions_N", [])
         if not ip_permission_list:
@@ -2099,7 +2112,7 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
             },
             "destination": {
                 "type": "SecurityGroup",
-                "value": "01a3e2a3-940c-4c6d-b0fe-3235c6199214"
+                "value": "<uuid>"
             },
             "service": {
                 "protocol": "*",
@@ -2217,7 +2230,7 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
         :return: resource input params
         :raise ApiManagerError:
         """
-        account_id = self.instance.account_id
+        # account_id = self.instance.account_id
 
         # base quotas
         quotas = {
@@ -2273,7 +2286,7 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
         :param rule_type: rule type: ingress or egress
         :return:
         """
-        res = False
+        # res = False
 
         # checks authorization
         # todo: authorization must be reconsidered when use process
@@ -2291,7 +2304,7 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
 
         rule_data = self.get_rule_ip_permission({"rule": rule}, self.instance, rule_type)
 
-        res = self.rule_factory(rule_data, reserved=False)
+        _res = self.rule_factory(rule_data, reserved=False)
         return True
 
     def aws_delete_rule(self, security_group, rule, rule_type):
@@ -2302,7 +2315,7 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
         :param rule_type: rule type: ingress or egress
         :return:
         """
-        res = False
+        # res = False
 
         # checks authorization
         # todo: authorization must be reconsidered when use process
@@ -2360,7 +2373,7 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
         """
         try:
             self.logger.info("Delete Rule for instance %s" % self.instance.uuid)
-            process_key, template = self.get_bpmn_process_key(self.instance, ApiServiceTypePlugin.PROCESS_ADD_RULE)
+            process_key, _template = self.get_bpmn_process_key(self.instance, ApiServiceTypePlugin.PROCESS_ADD_RULE)
             if process_key is not None and ApiServiceTypePlugin.INVALID_PROCESS_KEY != process_key:
                 # asynchronous way TODO
                 pass
@@ -2559,7 +2572,7 @@ class ApiNetworkSecurityGroup(AsyncApiServiceTypePlugin):
         rules = self.get_config("rules")
         compute_zone = self.get_config("computeZone")
         container = self.get_config("container")
-        uuid = self.instance.resource_uuid
+        # uuid = self.instance.resource_uuid
 
         # create rules
         for rule in rules:
@@ -3376,7 +3389,7 @@ class ApiNetworkHealthMonitor(AsyncApiServiceTypePlugin):
 
         # check is used
         controller: ServiceController = self.controller
-        links, total = controller.get_links(type="tg-hm", end_service=self.instance.oid)
+        _links, total = controller.get_links(type="tg-hm", end_service=self.instance.oid)
         if total != 0:
             raise ApiManagerError("Health monitor %s is in use, cannot be deleted" % self.instance.uuid)
 
@@ -3536,7 +3549,7 @@ class ApiNetworkTargetGroup(AsyncApiServiceTypePlugin):
             hm_plugin = controller.get_service_type_plugin(health_monitor_id, plugin_class=ApiNetworkHealthMonitor)
 
             # check health monitor is already used
-            links, total = self.controller.get_links(type="tg-hm", end_service=hm_plugin.instance.oid)
+            _links, total = self.controller.get_links(type="tg-hm", end_service=hm_plugin.instance.oid)
             if total != 0 and not hm_plugin.is_predefined():
                 raise ApiManagerError(
                     "Health monitor %s already registered with a target group. Deregister health "
@@ -3544,7 +3557,7 @@ class ApiNetworkTargetGroup(AsyncApiServiceTypePlugin):
                 )
 
             # check target group has already a health monitor attached
-            links, total = self.controller.get_links(type="tg-hm", start_service=self.instance.oid)
+            _links, total = self.controller.get_links(type="tg-hm", start_service=self.instance.oid)
             if total != 0:
                 raise ApiManagerError(
                     "Target group %s already has a health monitor attached. Deregister attached "
@@ -3698,7 +3711,7 @@ class ApiNetworkTargetGroup(AsyncApiServiceTypePlugin):
             self.__check_availability_zone(target_avz.get("uuid"))
 
             # add link to target if target is not registered yet
-            links, total = self.controller.get_links(
+            _links, total = self.controller.get_links(
                 type="tg-t",
                 start_service=self.instance.oid,
                 end_service=service_inst.oid,
@@ -3783,7 +3796,7 @@ class ApiNetworkTargetGroup(AsyncApiServiceTypePlugin):
 
             # delete link between target group and target
             service_inst: ApiServiceInstance = type_plugin.instance
-            links, total = self.controller.get_links(
+            _links, total = self.controller.get_links(
                 type="tg-t",
                 start_service=self.instance.oid,
                 end_service=service_inst.oid,
@@ -3837,7 +3850,7 @@ class ApiNetworkTargetGroup(AsyncApiServiceTypePlugin):
         service_inst: ApiServiceInstance = hm_plugin.instance
 
         # check health monitor is already used
-        links, total = self.controller.get_links(type="tg-hm", end_service=service_inst.oid)
+        _links, total = self.controller.get_links(type="tg-hm", end_service=service_inst.oid)
         if total != 0 and not hm_plugin.is_predefined():
             raise ApiManagerError(
                 "Health monitor %s already registered with a target group. Deregister health "
@@ -3845,7 +3858,7 @@ class ApiNetworkTargetGroup(AsyncApiServiceTypePlugin):
             )
 
         # check target group has already a health monitor attached
-        links, total = self.controller.get_links(type="tg-hm", start_service=self.instance.oid)
+        _links, total = self.controller.get_links(type="tg-hm", start_service=self.instance.oid)
         if total != 0:
             raise ApiManagerError(
                 "Target group %s already has a health monitor attached. Deregister attached "
@@ -4097,7 +4110,7 @@ class ApiNetworkListener(AsyncApiServiceTypePlugin):
 
         # check is used
         controller: ServiceController = self.controller
-        links, total = controller.get_links(type="lb-li", end_service=self.instance.oid)
+        _links, total = controller.get_links(type="lb-li", end_service=self.instance.oid)
         if total != 0:
             raise ApiManagerError("Listener %s is in use, cannot be deleted" % self.instance.uuid)
 
@@ -4296,7 +4309,7 @@ class ApiNetworkLoadBalancer(AsyncApiServiceTypePlugin):
         listener_info = listener_plugin.aws_info()
         li_predefined = dict_get(listener_info, "attachmentSet.Listener.predefined")
         if li_predefined is False:
-            links, total = controller.get_links(type="lb-li", end_service=listener.oid)
+            _links, total = controller.get_links(type="lb-li", end_service=listener.oid)
             if total != 0:
                 raise ApiManagerError(
                     "Listener %s is registered with another load balancer and cannot be reused" % listener.uuid
@@ -4306,7 +4319,7 @@ class ApiNetworkLoadBalancer(AsyncApiServiceTypePlugin):
         target_group: ApiServiceInstance = controller.get_service_instance(target_group_id)
         target_group_plugin: ApiNetworkTargetGroup = target_group.get_service_type_plugin()
         target_group_info = target_group_plugin.aws_info()
-        links, total = controller.get_links(type="lb-tg", end_service=target_group.oid)
+        _links, total = controller.get_links(type="lb-tg", end_service=target_group.oid)
         if total != 0:
             raise ApiManagerError(
                 "Target group %s is registered with another load balancer and cannot be reused" % target_group.uuid
@@ -4393,7 +4406,7 @@ class ApiNetworkLoadBalancer(AsyncApiServiceTypePlugin):
             account: ApiAccount = self.get_account()
 
             # get internet gateway plugin type, must be unique
-            res, tot = controller.get_service_type_plugins(
+            res, _tot = controller.get_service_type_plugins(
                 account_id=account.oid,
                 plugintype=ApiNetworkGateway.plugintype,
                 size=-1,
@@ -4412,7 +4425,7 @@ class ApiNetworkLoadBalancer(AsyncApiServiceTypePlugin):
             # get vpc resource uuid
             vpcs = igw.get_vpcs()
             vpc = vpcs[0]
-            data["vpc"] = (vpc.resource_uuid,)
+            data["vpc"] = vpc.resource_uuid
         else:
             # select site network
             site_network = site_networks.get(site_name)
@@ -4723,7 +4736,7 @@ class ApiNetworkLoadBalancer(AsyncApiServiceTypePlugin):
 
         try:
             # remove link to listener
-            links, tot = controller.get_links(start_service=self.instance.oid, type="lb-li")
+            links, _tot = controller.get_links(start_service=self.instance.oid, type="lb-li")
             links[0].expunge()
             if not no_linked_objs:
                 # delete listener instance
@@ -4735,7 +4748,7 @@ class ApiNetworkLoadBalancer(AsyncApiServiceTypePlugin):
 
         try:
             # remove link to target group
-            links, tot = controller.get_links(start_service=self.instance.oid, type="lb-tg")
+            links, _tot = controller.get_links(start_service=self.instance.oid, type="lb-tg")
             links[0].expunge()
             if not no_linked_objs:
                 # delete target group instance
@@ -5089,7 +5102,7 @@ class ApiSshGateway(AsyncApiServiceTypePlugin):
         :raise ApiManagerError:
         """
         # delete all links
-        links, tot = self.controller.get_links(service=self.instance.oid)
+        links, _tot = self.controller.get_links(service=self.instance.oid)
         for link in links:
             self.logger.debug("expunge link %s" % link.uuid)
             link.expunge()
@@ -5110,6 +5123,8 @@ class ApiSshGateway(AsyncApiServiceTypePlugin):
             dest_uuid = config.get("dest_uuid", None)
             dest = self.controller.get_service_instance(dest_uuid)
         except ApiManagerError as am_err:
+            # change status to error only when destination not found
+            self.update_status(SrvStatusType.ERROR, error=am_err.value)
             raise ApiManagerError(
                 "Error fetching destination info (dest_uuid:%s): %s." % (dest_uuid, am_err.value)
             ) from am_err

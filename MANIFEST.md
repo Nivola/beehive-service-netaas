@@ -1,11 +1,9 @@
 SQLAlchemy==1.4.23
 Flask==2.0.1
-Flask-Babel==2.0.0
 Flask-Login==0.6.0
 Flask-SQLAlchemy==2.5.1
 Flask-WTF==0.15.1
 Flask-Session==0.4.0
-
 pika==1.2.0
 paramiko==2.7.2
 blessings==1.7.0
@@ -13,7 +11,7 @@ psutil==5.8.0
 prettytable==2.1.0
 redis==3.5.3
 passlib==1.7.4
-PyMySQL==1.0.2
+pymysql==1.0.2
 httplib2==0.19.1
 pymongo==3.12.0
 ujson==4.1.0
@@ -31,7 +29,7 @@ networkx==2.6.2
 cryptography==3.4.7
 celery==5.2.3
 urllib3==1.26.6
-pyOpenSSL==20.0.1
+pyopenssl==20.0.1
 pycryptodome==3.12.0
 xmltodict==0.12.0
 PyYAML==5.4.1
@@ -39,10 +37,9 @@ proxmoxer==1.1.1
 geventhttpclient==1.5.1
 tabulate==0.8.9
 ipaddress==1.0.23
-
 oauthlib==3.1.1
 requests-oauthlib==1.3.0
-PyJWT==2.0.1
+pyjwt==2.1.0
 bcrypt==3.2.0
 apispec==5.1.0
 flasgger==0.9.5
@@ -55,4 +52,4 @@ python-dateutil==2.8.2
 billiard==3.6.4.0
 elasticsearch==8.1.2
 six==1.16.0
-netapp-ontap==9.8.0
+netapp-ontap==9.9.1

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 from flasgger import fields, Schema
 from beehive.common.apimanager import ApiView
@@ -19,6 +19,7 @@ from beehive_service.plugins.computeservice.controller import (
     ApiComputeService,
 )
 from beecell.simple import merge_dicts
+from beehive_service_netaas.networkservice.validation import validate_network
 
 
 class InstanceTagSetResponseSchema(Schema):
@@ -320,7 +321,9 @@ class CreateSubnetApiParamRequestSchema(Schema):
     SubnetDescription = fields.String(required=False, example="", description="description of the subnet")
     VpcId = fields.String(required=True, example="", description="parent vpc id or uuid")
     AvailabilityZone = fields.String(required=True, example="", description="subnet availability zone")
-    CidrBlock = fields.String(required=True, example="", description="subnet cidr like ###.###.###.###/##")
+    CidrBlock = fields.String(
+        required=True, example="", validate=validate_network, description="subnet cidr like ###.###.###.###/##"
+    )
     Nvl_SubnetType = fields.String(required=False, missing=None, description="subnet template")
 
 

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2023 CSI-Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
 
 from flasgger import Schema
 from beecell.simple import id_gen
@@ -11,6 +11,7 @@ from beehive_service.views import ServiceApiView
 from beecell.swagger import SwaggerHelper
 from flasgger.marshmallow_apispec import fields
 from beehive_service_netaas.networkservice import ApiNetworkGateway, ApiNetworkService
+from beehive_service.controller import ServiceController
 
 
 class GatewayApiTagResponseSchema(Schema):
@@ -21,25 +22,34 @@ class GatewayApiTagResponseSchema(Schema):
 class GatewayApiAttachedVpcResponseSchema(Schema):
     state = fields.String(
         required=True,
-        example="account1",
+        example="available",
         description="the current state of the attachment. For an internet gateway, the state is "
         "available when attached to a VPC; otherwise, this value is not returned.",
     )
-    vpcId = fields.String(required=True, example="eur89", description="id of the vpc")
+    vpcId = fields.String(required=True, example="951b793c-5c19-4ebd-968c-8e131b7d7bfc", description="id of the vpc")
     nvl_vpcName = fields.String(
         required=False,
-        example="vpc1",
+        example="VpcPrivate01",
         data_key="nvl-vpcName",
         description="name of the vpc",
+    )
+
+
+class GatewayApiVpcSecurityGroupMembershipResponseSchema(Schema):
+    VpcSecurityGroupMembership = fields.Nested(
+        GatewayApiAttachedVpcResponseSchema,
+        required=False,
+        description="Any VPCs attached to the internet gateway",
     )
 
 
 class InternetGatewaysResponseSchema(Schema):
     tagSet = fields.Nested(GatewayApiTagResponseSchema, many=True, required=False, allow_none=True)
     attachmentSet = fields.Nested(
-        GatewayApiAttachedVpcResponseSchema,
+        GatewayApiVpcSecurityGroupMembershipResponseSchema,
         required=False,
         description="Any VPCs attached to the internet gateway",
+        many=True,
     )
     internetGatewayId = fields.String(required=True, example="12", description="id of the gateway")
     ownerId = fields.String(required=True, example="", descriptiom="ID of the account that owns the gateway")
@@ -56,9 +66,14 @@ class InternetGatewaysResponseSchema(Schema):
         data_key="nvl-state",
         description="state of the VPC (pending | available | transient | error)",
     )
+    nvl_bastion = fields.Boolean(required=False, example="true", descriptiom="bastion present", data_key="nvl-bastion")
+    nvl_external_ip_address = fields.String(
+        required=False, example="84.240.132.25", descriptiom="ip address", data_key="nvl-external_ip_address"
+    )
 
 
 class DescribeInternetGatewaysResponse1Schema(Schema):
+    xmlns = fields.String(required=False, data_key="$xmlns")
     requestId = fields.String(required=True, example="ednundw83ldw", description="request id")
     internetGatewaySet = fields.Nested(
         InternetGatewaysResponseSchema,
@@ -73,7 +88,8 @@ class DescribeInternetGatewaysResponse1Schema(Schema):
         data_key="nvl-internetGatewayTotal",
     )
     nextToken = fields.String(
-        required=True,
+        required=False,
+        allow_none=True,
         example="ednundw83ldw",
         description="The token to use to retrieve the next page of results. This value is null",
     )
@@ -343,9 +359,9 @@ class DeleteInternetGateway(ServiceApiView):
     )
     response_schema = DeleteInternetGatewayResponseSchema
 
-    def delete(self, controller, data, *args, **kwargs):
+    def delete(self, controller: ServiceController, data, *args, **kwargs):
         gateway_id = data.pop("InternetGatewayId")
-        type_plugin: ApiNetworkGateway = controller.get_service_type_plugin(gateway_id)
+        type_plugin: ApiNetworkGateway = controller.get_service_type_plugin(gateway_id, plugin_class=ApiNetworkGateway)
         type_plugin.delete()
 
         res = {
@@ -416,7 +432,10 @@ class AttachInternetGateway(ServiceApiView):
         data = data.get("gateway")
         gateway_id = data.pop("InternetGatewayId")
         vpc_id = data.pop("VpcId")
-        type_plugin = controller.get_service_type_plugin(gateway_id)
+
+        from beehive_service_netaas.networkservice.controller import ApiNetworkGateway
+
+        type_plugin: ApiNetworkGateway = controller.get_service_type_plugin(gateway_id)
         type_plugin.attach_vpc(vpc_id)
 
         res = {
@@ -487,7 +506,10 @@ class DetachInternetGateway(ServiceApiView):
         data = data.get("gateway")
         gateway_id = data.pop("InternetGatewayId")
         vpc_id = data.pop("VpcId")
-        type_plugin = controller.get_service_type_plugin(gateway_id)
+
+        from beehive_service_netaas.networkservice.controller import ApiNetworkGateway
+
+        type_plugin: ApiNetworkGateway = controller.get_service_type_plugin(gateway_id)
         type_plugin.detach_vpc(vpc_id)
 
         res = {
@@ -702,13 +724,14 @@ class DeleteInternetGatewayBastion(ServiceApiView):
     )
     response_schema = DeleteInternetGatewayBastionResponseSchema
 
-    def delete(self, controller, data, *args, **kwargs):
+    def delete(self, controller: ServiceController, data, *args, **kwargs):
         data = data.get("bastion")
         gateway_id = data.pop("InternetGatewayId")
 
         from beehive_service_netaas.networkservice.controller import ApiNetworkGateway
 
         type_plugin: ApiNetworkGateway = controller.get_service_type_plugin(gateway_id)
+        type_plugin: ApiNetworkGateway = controller.get_service_type_plugin(gateway_id, plugin_class=ApiNetworkGateway)
         type_plugin.delete_bastion()
 
         res = {

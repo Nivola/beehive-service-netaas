@@ -1,17 +1,25 @@
+# SPDX-License-Identifier: EUPL-1.2
+#
+# (C) Copyright 2018-2024 Regione Piemonte
+# (C) Copyright 2018-2024 CSI-Piemonte
+
 from logging import getLogger
+from itertools import groupby
+from typing import AbstractSet
 from beehive_service.plugins.databaseservice.controller import (
     ApiDatabaseServiceInstance,
 )
 from beehive_service.plugins.computeservice.controller import (
     ApiComputeInstance,
 )
-from itertools import groupby
-from typing import AbstractSet
 
 
 def to_ranges(in_set):
+    """
+    from set to ranges
+    """
     iterable = sorted(in_set)
-    for key, group in groupby(enumerate(iterable), lambda t: t[1] - t[0]):
+    for _key, group in groupby(enumerate(iterable), lambda t: t[1] - t[0]):
         group = list(group)
         yield group[0][1], group[-1][1]
 
@@ -32,7 +40,7 @@ class SshGatewayHelperError(Exception):
         return f"{self.value}"
 
 
-class SshGwType(object):
+class SshGwType:
     """enumerate ssh gateway type"""
 
     DBAAS = "gw_dbaas"
@@ -44,12 +52,12 @@ class SshGwType(object):
         True if string_value is among the enumerated values
         False otherwise
         """
-        if string_value != SshGwType.DBAAS and string_value != SshGwType.CPAAS:
+        if string_value not in (SshGwType.DBAAS, SshGwType.CPAAS):
             return False
         return True
 
 
-class SshGatewayHelper(object):
+class SshGatewayHelper:
     """
     helper class for ssh gateway service module
     """
@@ -143,9 +151,9 @@ class SshGatewayHelper(object):
             db_port = dest_plugin_type.aws_info().get("Endpoint", {}).get("Port", None)
             if db_port is None:
                 raise SshGatewayHelperError("Unable to determine database port.")
-            else:
-                db_port = int(db_port)
-                parsed_ports_set = [[db_port, db_port]]
+
+            db_port = int(db_port)
+            parsed_ports_set = [[db_port, db_port]]
         else:
             parsed_ports_set = self._parse_port_list(allowed_ports)
             parsed_ports_set = self._parse_port_list(forbidden_ports, parsed_ports_set, True)
