@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
-# (C) Copyright 2018-2024 CSI-Piemonte
-
+# (C) Copyright 2018-2026 CSI-Piemonte
+from __future__ import annotations
 from flasgger import Schema
 from flasgger.marshmallow_apispec import fields
 from marshmallow.validate import OneOf
@@ -9,13 +9,16 @@ from beehive.common.apimanager import ApiView, ApiManagerError
 from beehive.common.data import operation
 from beecell.swagger import SwaggerHelper
 from beehive_service.views import ServiceApiView
-from beehive_service_netaas.networkservice.controller import ApiNetworkService, ApiSshGateway, ServiceController
+from beehive_service_netaas.networkservice.controller import ApiNetworkService, ApiSshGateway
 from beehive_service_netaas.networkservice.helper.sshgateway_helper import (
     SshGatewayHelper,
     SshGatewayHelperError,
     SshGwType,
 )
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from beehive_service.plugins.computeservice.controller import ServiceController
 
 class CreateSshGatewayConfResponseNestedSchema(Schema):
     """
@@ -23,8 +26,8 @@ class CreateSshGatewayConfResponseNestedSchema(Schema):
     """
 
     xmlns = fields.String(required=False, data_key="__xmlns")
-    taskid = fields.UUID(required=True, description="task uuid")
-    uuid = fields.UUID(required=True, allow_none=False, description="ssh gateway configuration uuid")
+    taskid = fields.UUID(required=True, metadata={"description": "task uuid"})
+    uuid = fields.UUID(required=True, allow_none=False, metadata={"description": "ssh gateway configuration uuid"})
 
 
 class CreateSshGatewayConfResponseSchema(Schema):
@@ -42,8 +45,8 @@ class CreateSshGatewayConfRequestNestedSchema(Schema):
     CreateSshGatewayConfRequestNestedSchema
     """
 
-    name = fields.String(required=False, default="ssh gateway name")
-    desc = fields.String(required=False, default="ssh gateway description")
+    name = fields.String(required=False, dump_default="ssh gateway name")
+    desc = fields.String(required=False, dump_default="ssh gateway description")
     gw_type = fields.String(
         validate=OneOf(
             [
@@ -52,8 +55,8 @@ class CreateSshGatewayConfRequestNestedSchema(Schema):
             ],
             error="invalid gw_type",
         ),
-        description="type of ssh gateway",
         required=True,
+        metadata={"description": "type of ssh gateway"},
     )
     dest_uuid = fields.String(required=False, allow_none=False)
     allowed_ports = fields.List(
@@ -61,14 +64,14 @@ class CreateSshGatewayConfRequestNestedSchema(Schema):
         required=True,
         allow_none=False,
         collection_format="multi",
-        description="allowed ports list",
+        metadata={"description": "allowed ports list"},
     )
     forbidden_ports = fields.List(
         fields.String(example=""),
         required=False,
         allow_none=True,
         collection_format="multi",
-        description="forbidden ports list",
+        metadata={"description": "forbidden ports list"},
     )
 
 
@@ -107,7 +110,7 @@ class CreateSshGatewayConf(ServiceApiView):
         {202: {"description": "success", "schema": CreateSshGatewayConfResponseSchema}}
     )
 
-    def post(self, controller, data, *args, **kwargs):
+    def post(self, controller: ServiceController, data, *args, **kwargs):
         """
         create a new ssh gw destination service instance
         """
@@ -178,30 +181,31 @@ class DescribeSshGatewayConfResponseSchema(Schema):
     DescribeSshGatewayConfResponseSchema
     """
 
-    sshGatewayConfId = fields.String(required=True, example="12", description="id of the ssh gateway configuration")
+    sshGatewayConfId = fields.String(
+        required=True,
+        metadata={"example": "12", "description": "id of the ssh gateway configuration"},
+    )
     ownerId = fields.String(
         required=True,
-        example="",
-        description="ID of the account that owns the ssh gateway configuration",
+        metadata={"description": "ID of the account that owns the ssh gateway configuration"},
     )
     nvl_ownerAlias = fields.String(
         required=False,
-        example="test",
         data_key="nvl-ownerAlias",
-        description="alias of the account that owns the ssh gateway configuration",
+        metadata={"example": "test", "description": "alias of the account that owns the ssh gateway configuration"},
     )
     nvl_name = fields.String(
         required=False,
-        example="test",
-        description="ssh gateway configuration name",
         data_key="nvl-name",
+        metadata={"example": "test", "description": "ssh gateway configuration name"},
     )
-    nvl_state = fields.String(required=False, data_key="nvl-state", description="state of the instance object")
-    gwType = fields.String(required=False, description="type of ssh gateway")
-    destination = fields.String(
-        required=True,
-        description="uuid of the destination service instance",
+    nvl_state = fields.String(
+        required=False,
+        data_key="nvl-state",
+        metadata={"description": "state of the instance object"},
     )
+    gwType = fields.String(required=False, metadata={"description": "type of ssh gateway"})
+    destination = fields.String(required=True, metadata={"description": "uuid of the destination service instance"})
 
 
 class DescribeSshGatewaysConfNestedResponseSchema(Schema):
@@ -210,18 +214,17 @@ class DescribeSshGatewaysConfNestedResponseSchema(Schema):
     """
 
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, allow_none=False, description="Request ID")
+    requestId = fields.String(required=True, allow_none=False, metadata={"description": "Request ID"})
     nvl_sshGatewayTotal = fields.Integer(
         required=True,
-        example="",
-        description="Total number of ssh gateway configurations",
         data_key="nvl-sshGatewayTotal",
+        metadata={"description": "Total number of ssh gateway configurations"},
     )
     sshGatewaySet = fields.Nested(
         DescribeSshGatewayConfResponseSchema,
         many=True,
         required=True,
-        description="List of ssh gateway configurations",
+        metadata={"description": "List of ssh gateway configurations"},
     )
 
 
@@ -244,13 +247,13 @@ class DescribeSshGatewaysConfRequestSchema(Schema):
     """
 
     owner_id_N = fields.List(
-        fields.String(example=""),
+        fields.String(),
         required=False,
         allow_none=True,
         context="query",
         collection_format="multi",
         data_key="owner-id.N",
-        description="account ID of the ssh gw conf owner",
+        metadata={"description": "account ID of the ssh gw conf owner"},
     )
     sshgwconf_id_N = fields.List(
         fields.String(example=""),
@@ -259,7 +262,7 @@ class DescribeSshGatewaysConfRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="sshgwconf-id.N",
-        description="ID of the ssh gw conf",
+        metadata={"description": "ID of the ssh gw conf"},
     )
     sshgwconf_name_N = fields.List(
         fields.String(example=""),
@@ -268,7 +271,7 @@ class DescribeSshGatewaysConfRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="sshgwconf-name.N",
-        description="Name of the ssh gw conf",
+        metadata={"description": "Name of the ssh gw conf"},
     )
     tag_N = fields.List(
         fields.String(example=""),
@@ -277,11 +280,11 @@ class DescribeSshGatewaysConfRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="tag.N",
-        description="value of a tag assigned to the resource",
+        metadata={"description": "value of a tag assigned to the resource"},
     )
-    sshgwconf_type = fields.String(required=False, allow_none=True, data_key="sshgwconf-type")
-    size = fields.Integer(required=False, default=10, description="", context="query")
-    page = fields.Integer(required=False, default=0, description="", context="query")
+    sshgwconf_type = fields.String(context="query", required=False, allow_none=True, data_key="sshgwconf-type")
+    size = fields.Integer(required=False, dump_default=10, context="query", metadata={"description": ""})
+    page = fields.Integer(required=False, dump_default=0, context="query", metadata={"description": ""})
 
 
 class DescribeSshGatewaysConf(ServiceApiView):
@@ -304,7 +307,7 @@ class DescribeSshGatewaysConf(ServiceApiView):
         }
     )
 
-    def get(self, controller, data, *args, **kwargs):
+    def get(self, controller:ServiceController, data, *args, **kwargs):
         """
         list or get configuration(s)
         """
@@ -350,8 +353,8 @@ class DeleteSshGatewayConfResponseItemSchema(Schema):
     """
 
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, default="The ID of the request")
-    nvl_return = fields.Boolean(required=True, example=True, data_key="return")
+    requestId = fields.String(required=True, dump_default="The ID of the request")
+    nvl_return = fields.Boolean(required=True, data_key="return", metadata={"example": True})
 
 
 class DeleteSshGatewayConfResponseSchema(Schema):
@@ -372,7 +375,11 @@ class DeleteSshGatewayConfRequestSchema(Schema):
     class DeleteSshGatewayConfRequestSchema
     """
 
-    ssh_gateway_id = fields.String(required=True, context="query", description="ssh gateway configuration oid")
+    ssh_gateway_id = fields.String(
+        required=True,
+        context="query",
+        metadata={"description": "ssh gateway configuration oid"},
+    )
 
 
 class DeleteSshGatewayConfBodyRequestSchema(Schema):
@@ -426,18 +433,16 @@ class ActivateSshGatewayConfApi1ResponseSchema(Schema):
     ActivateSshGatewayConfApi1ResponseSchema
     """
 
-    requestId = fields.String(required=True, default="", allow_none=True)
+    requestId = fields.String(required=True, dump_default="", allow_none=True)
     keyMaterial = fields.String(
         required=True,
         allow_none=False,
-        example="",
-        description="An unencrypted PEM encoded ED private key",
+        metadata={"description": "An unencrypted PEM encoded ED private key"},
     )
     commandTemplate = fields.String(
         required=True,
         allow_none=False,
-        example="ssh -L ...",
-        description="ssh local port forwarding sample command",
+        metadata={"example": "ssh -L ...", "description": "ssh local port forwarding sample command"},
     )
 
 
@@ -447,7 +452,15 @@ class ActivateSshGatewayConfApiResponseSchema(Schema):
     """
 
     ActivateSshGatewayConfResponse = fields.Nested(
-        ActivateSshGatewayConfApi1ResponseSchema, required=True, many=False, allow_none=False
+
+        ActivateSshGatewayConfApi1ResponseSchema,
+
+        required=True,
+
+        many=False,
+
+        allow_none=False,
+
     )
 
 
@@ -456,8 +469,12 @@ class ActivateSshGatewayConfApiRequestSchema(Schema):
     ActivateSshGatewayConfApiRequestSchema
     """
 
-    ssh_gateway_id = fields.String(required=True, allow_none=False, description="ssh gateway configuration oid")
-    destination_port = fields.Int(required=True, allow_none=False, description="destination port")
+    ssh_gateway_id = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={"description": "ssh gateway configuration oid"},
+    )
+    destination_port = fields.Int(required=True, allow_none=False, metadata={"description": "destination port"})
 
 
 class ActivateSshGatewayConfBodyRequestSchema(Schema):
@@ -487,7 +504,7 @@ class ActivateSshGatewayConf(ServiceApiView):
     )
     response_schema = ActivateSshGatewayConfApiResponseSchema
 
-    def put(self, controller, data, *args, **kwargs):
+    def put(self, controller:ServiceController, data, *args, **kwargs):
         """
         check permission and generate keypair for user
         """

@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from flasgger import fields, Schema
 from beehive.common.data import operation
@@ -25,23 +25,35 @@ class DescribeNetworkServiceRequestSchema(Schema):
         allow_none=False,
         context="query",
         data_key="owner-id",
-        description="account ID of the instance owner",
+        metadata={"description": "account ID of the instance owner"},
     )
 
 
-class DescribeNetworkServiceResponseSchema(Schema):
-    id = fields.String(required=True)
-    name = fields.String(required=True)
-    description = fields.String(required=True)
-    account_id = fields.String(required=True)
-    account_name = fields.String(required=True)
-    template_id = fields.String(required=True)
-    template_name = fields.String(required=True)
-    state = fields.String(required=False, default=SrvStatusType.DRAFT)
+class DescribeNetworkServiceItemsSchema(Schema):
+    id = fields.String(required=False)
+    name = fields.String(required=False)
+    description = fields.String(required=False)
+    creationDate = fields.String(required=False)
+    # account_id = fields.String(required=False)
+    # account_name = fields.String(required=False)
+    owner = fields.String(required=False)
+    owner_name = fields.String(required=False)
+    template = fields.String(required=False)
+    template_name = fields.String(required=False)
+    state = fields.String(required=False, dump_default=SrvStatusType.DRAFT)
     resource_uuid = fields.String(required=False, allow_none=True)
-    stateReason = fields.String(required=False, default="")
-    limits = fields.Dict(required=False, default={})
+    stateReason = fields.Dict(required=False, dump_default="")
+    limits = fields.Dict(required=False, dump_default={})
 
+class DescribeNetworkServiceSchema(Schema):
+    xmlns = fields.String(required=False, data_key="__xmlns")
+    requestId = fields.String(required=False)
+    networkSet = fields.Nested(DescribeNetworkServiceItemsSchema, many=True)
+    networkTotal = fields.Integer(required=False)
+
+
+class DescribeNetworkServiceResponseSchema(Schema):
+    DescribeNetworkResponse = fields.Nested(DescribeNetworkServiceSchema, many=False)
 
 class DescribeNetworkService(ServiceApiView):
     summary = "Get network service info"
@@ -84,10 +96,10 @@ class DescribeNetworkService(ServiceApiView):
 
 class CreateNetworkServiceApiRequestSchema(Schema):
     owner_id = fields.String(required=True)
-    name = fields.String(required=False, default="")
-    desc = fields.String(required=False, default="")
-    service_def_id = fields.String(required=True, default="")
-    resource_desc = fields.String(required=False, default="")
+    name = fields.String(required=False, dump_default="")
+    desc = fields.String(required=False, dump_default="")
+    service_def_id = fields.String(required=True, dump_default="")
+    resource_desc = fields.String(required=False, dump_default="")
 
 
 class CreateNetworkServiceApiBodyRequestSchema(Schema):
@@ -134,12 +146,12 @@ class UpdateNetworkServiceApiRequestParamSchema(Schema):
         allow_none=False,
         context="query",
         data_key="owner-id",
-        description="account ID of the instance owner",
+        metadata={"description": "account ID of the instance owner"},
     )
-    # params_resource = fields.String(required=False, default='{}')
-    name = fields.String(required=False, default="")
-    desc = fields.String(required=False, default="")
-    service_def_id = fields.String(required=False, default="")
+    # params_resource = fields.String(required=False, dump_default='{}')
+    name = fields.String(required=False, dump_default="")
+    desc = fields.String(required=False, dump_default="")
+    service_def_id = fields.String(required=False, dump_default="")
 
 
 class UpdateNetworkServiceApiRequestSchema(Schema):
@@ -193,15 +205,24 @@ class DescribeAccountAttributesRequestSchema(Schema):
         allow_none=False,
         context="query",
         data_key="owner-id",
-        description="account ID of the instance owner",
+        metadata={"description": "account ID of the instance owner"},
     )
 
+class AttributeValueItemSchema(Schema):
+    attributeValue = fields.Integer()
+    nvl_attributeUsed = fields.Integer(data_key="nvl-attributeUsed")
+
+class AttributeValueList(Schema):
+    item = fields.Nested(AttributeValueItemSchema, many=False)
+
+# class AttributeItemSchem(Schema):
 
 class DescribeAccountAttributeSetResponseSchema(Schema):
-    uuid = fields.String(required=True, default="")
-
+    attributeName = fields.String(required=True)
+    attributeValueSet = fields.Nested(AttributeValueList, many=True)
 
 class DescribeAccountAttributeResponseSchema(Schema):
+    xmlns = fields.String(required=False, data_key="__xmlns")
     requestId = fields.String(required=True, allow_none=True)
     accountAttributeSet = fields.Nested(DescribeAccountAttributeSetResponseSchema, many=True, required=True)
 
@@ -258,7 +279,7 @@ class DescribeAccountAttributes(ServiceApiView):
 
 class ModifyAccountAttributeBodyRequestSchema(Schema):
     owner_id = fields.String(required=True)
-    quotas = fields.Dict(required=True, default="")
+    quotas = fields.Dict(required=True, dump_default="")
 
 
 class ModifyAccountAttributesBodyRequestSchema(Schema):
@@ -266,7 +287,7 @@ class ModifyAccountAttributesBodyRequestSchema(Schema):
 
 
 class ModifyAccountAttributeSetResponseSchema(Schema):
-    uuid = fields.String(required=True, default="")
+    uuid = fields.String(required=True, dump_default="")
 
 
 class ModifyAccountAttributeResponseSchema(Schema):
@@ -326,8 +347,8 @@ class ModifyAccountAttributes(ServiceApiView):
 
 
 class DeleteNetworkServiceResponseSchema(Schema):
-    uuid = fields.String(required=True, description="Instance is")
-    taskid = fields.String(required=True, description="task id")
+    uuid = fields.String(required=True, metadata={"description": "Instance is"})
+    taskid = fields.String(required=True, metadata={"description": "task id"})
 
 
 class DeleteNetworkServiceRequestSchema(Schema):
@@ -335,7 +356,7 @@ class DeleteNetworkServiceRequestSchema(Schema):
         required=True,
         allow_none=True,
         context="query",
-        description="Instance uuid or name",
+        metadata={"description": "Instance uuid or name"},
     )
 
 

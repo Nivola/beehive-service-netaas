@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from flasgger import Schema
 from beecell.simple import id_gen
-from beehive.common.apimanager import ApiView, SwaggerApiView
+from beehive.common.apimanager import ApiView, SwaggerApiView, XmlnsSchema
 from beehive.common.data import operation
 from beehive_service.views import ServiceApiView
 from beecell.swagger import SwaggerHelper
@@ -15,23 +15,26 @@ from beehive_service.controller import ServiceController
 
 
 class GatewayApiTagResponseSchema(Schema):
-    key = fields.String(required=True, example="test", description="the key of the tag")
-    value = fields.String(required=True, example="test", description="the value of the tag")
+    key = fields.String(required=True, metadata={"example": "test", "description": "the key of the tag"})
+    value = fields.String(required=True, metadata={"example": "test", "description": "the value of the tag"})
 
 
 class GatewayApiAttachedVpcResponseSchema(Schema):
     state = fields.String(
         required=True,
-        example="available",
-        description="the current state of the attachment. For an internet gateway, the state is "
-        "available when attached to a VPC; otherwise, this value is not returned.",
+        metadata={"example": "available", "description": "the current state of the attachment. For an internet gateway, the state is "
+        "available when attached to a VPC; otherwise, this value is not returned."},
     )
-    vpcId = fields.String(required=True, example="951b793c-5c19-4ebd-968c-8e131b7d7bfc", description="id of the vpc")
+
+    vpcId = fields.String(
+        required=True,
+        metadata={"example": "951b793c-5c19-4ebd-968c-8e131b7d7bfc", "description": "id of the vpc"},
+    )
+
     nvl_vpcName = fields.String(
         required=False,
-        example="VpcPrivate01",
         data_key="nvl-vpcName",
-        description="name of the vpc",
+        metadata={"example": "VpcPrivate01", "description": "name of the vpc"},
     )
 
 
@@ -39,59 +42,81 @@ class GatewayApiVpcSecurityGroupMembershipResponseSchema(Schema):
     VpcSecurityGroupMembership = fields.Nested(
         GatewayApiAttachedVpcResponseSchema,
         required=False,
-        description="Any VPCs attached to the internet gateway",
+        metadata={"description": "Any VPCs attached to the internet gateway"},
     )
 
 
 class InternetGatewaysResponseSchema(Schema):
     tagSet = fields.Nested(GatewayApiTagResponseSchema, many=True, required=False, allow_none=True)
+
     attachmentSet = fields.Nested(
         GatewayApiVpcSecurityGroupMembershipResponseSchema,
         required=False,
-        description="Any VPCs attached to the internet gateway",
         many=True,
+        metadata={"description": "Any VPCs attached to the internet gateway"},
     )
-    internetGatewayId = fields.String(required=True, example="12", description="id of the gateway")
-    ownerId = fields.String(required=True, example="", descriptiom="ID of the account that owns the gateway")
+
+    internetGatewayId = fields.String(required=True, metadata={"example": "12", "description": "id of the gateway"})
+
+    ownerId = fields.String(
+        required=True,
+        metadata={"description": "ID of the account that owns the gateway"},
+    )
+
     nvl_ownerAlias = fields.String(
         required=False,
-        example="test",
         data_key="nvl-ownerAlias",
-        descriptiom="alias of the account that owns the gateway",
+        metadata={"example": "test", "description": "alias of the account that owns the gateway"},
     )
-    nvl_name = fields.String(required=False, example="test", descriptiom="gateway name", data_key="nvl-name")
+
+    nvl_name = fields.String(
+        required=False,
+        data_key="nvl-name",
+        metadata={"example": "test", "description": "gateway name"},
+    )
+
     nvl_state = fields.String(
         required=False,
-        example="pending",
         data_key="nvl-state",
-        description="state of the VPC (pending | available | transient | error)",
+        metadata={"example": "pending", "description": "state of the VPC (pending | available | transient | error)"},
     )
-    nvl_bastion = fields.Boolean(required=False, example="true", descriptiom="bastion present", data_key="nvl-bastion")
+
+    nvl_bastion = fields.Boolean(
+        required=False,
+        data_key="nvl-bastion",
+        allow_none=True,
+        metadata={"example": True, "description": "bastion present"},
+    )
+
     nvl_external_ip_address = fields.String(
-        required=False, example="84.240.132.25", descriptiom="ip address", data_key="nvl-external_ip_address"
+        required=False,
+        data_key="nvl-external_ip_address",
+        allow_none=True,
+        metadata={"example": "84.240.132.25", "description": "ip address"},
     )
 
 
 class DescribeInternetGatewaysResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="$xmlns")
-    requestId = fields.String(required=True, example="ednundw83ldw", description="request id")
+    requestId = fields.String(required=True, metadata={"example": "ednundw83ldw", "description": "request id"})
+
     internetGatewaySet = fields.Nested(
         InternetGatewaysResponseSchema,
         many=True,
         required=True,
-        description="list of gateway definition",
+        metadata={"description": "list of gateway definition"},
     )
+
     nvl_internetGatewayTotal = fields.Integer(
         required=True,
-        example="",
-        description="total number of subnet",
         data_key="nvl-internetGatewayTotal",
+        metadata={"description": "total number of subnet"},
     )
+
     nextToken = fields.String(
         required=False,
         allow_none=True,
-        example="ednundw83ldw",
-        description="The token to use to retrieve the next page of results. This value is null",
+        metadata={"example": "ednundw83ldw", "description": "The token to use to retrieve the next page of results. This value is null"},
     )
 
 
@@ -112,8 +137,9 @@ class DescribeInternetGatewaysRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="owner-id.N",
-        description="account ID of the gateway owner",
+        metadata={"description": "account ID of the gateway owner"},
     )
+
     InternetGatewayId_N = fields.List(
         fields.String(example=""),
         required=False,
@@ -121,19 +147,19 @@ class DescribeInternetGatewaysRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="InternetGatewayId.N",
-        description="One or more internet gateway IDs",
+        metadata={"description": "One or more internet gateway IDs"},
     )
+
     MaxResults = fields.Integer(
         required=False,
-        default=10,
-        description="",
+        dump_default=10,
         data_key="MaxResults",
         context="query",
     )
+
     NextToken = fields.String(
         required=False,
-        default="0",
-        description="",
+        dump_default="0",
         data_key="NextToken",
         context="query",
     )
@@ -146,6 +172,7 @@ class DescribeInternetGateways(ServiceApiView):
     definitions = {"DescribeInternetGatewaysResponseSchema": DescribeInternetGatewaysResponseSchema}
     parameters = SwaggerHelper().get_parameters(DescribeInternetGatewaysRequestSchema)
     parameters_schema = DescribeInternetGatewaysRequestSchema
+
     responses = ServiceApiView.setResponses(
         {
             200: {
@@ -154,6 +181,7 @@ class DescribeInternetGateways(ServiceApiView):
             }
         }
     )
+
     response_schema = DescribeInternetGatewaysResponseSchema
 
     def get(self, controller, data, *args, **kwargs):
@@ -207,34 +235,37 @@ class DescribeInternetGateways(ServiceApiView):
 
 
 class CreateInternetGatewayApiResponse2Schema(Schema):
-    internetGatewayId = fields.String(required=True, example="igw-eaad4883", description="id of the gateway")
-    ownerId = fields.String(required=True, example="account1", description="id of the owner account")
-    attachmentSet = fields.Nested(
-        GatewayApiAttachedVpcResponseSchema,
-        required=False,
-        description="Any VPCs attached to the internet gateway",
-    )
-    tagSet = fields.Nested(
-        GatewayApiTagResponseSchema,
-        required=False,
-        description="Any tags assigned to the internet gateway",
+    internetGatewayId = fields.String(
+        required=True,
+        metadata={"example": "igw-eaad4883", "description": "id of the gateway"},
     )
 
+    ownerId = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={"example": "account1", "description": "id of the owner account"},
+    )
 
-class CreateInternetGatewayApiResponse1Schema(Schema):
+    attachmentSet = fields.List(fields.String(required=False, allow_none=True))
+    tagSet = fields.List(fields.String(required=False, allow_none=True))
+
+
+class CreateInternetGatewayApiResponse1Schema(XmlnsSchema):
     internetGateway = fields.Nested(CreateInternetGatewayApiResponse2Schema, required=True, allow_none=False)
     requestId = fields.String(required=True, allow_none=True)
 
 
 class CreateInternetGatewayApiResponseSchema(Schema):
     CreateInternetGatewayResponse = fields.Nested(
-        CreateInternetGatewayApiResponse1Schema, required=True, allow_none=False
+        CreateInternetGatewayApiResponse1Schema,
+        required=True,
+        allow_none=False,
     )
 
 
 class CreateInternetGatewayApiParamRequestSchema(Schema):
-    owner_id = fields.String(required=True, example="", description="account id", data_key="owner-id")
-    Nvl_GatewayType = fields.String(required=False, missing=None, description="gateway template")
+    owner_id = fields.String(required=True, data_key="owner-id", metadata={"description": "account id"})
+    Nvl_GatewayType = fields.String(required=False, load_default=None, metadata={"description": "gateway template"})
     # TagSpecification_N = fields.Nested(TagSpecificationMappingApiRequestSchema, required=False, many=True,
     #                                    allow_none=False, data_key='TagSpecification.N',
     #                                    description='The tags to apply to the resources during launch')
@@ -252,10 +283,12 @@ class CreateInternetGateway(ServiceApiView):
     summary = "Create network gateway"
     description = "Create network gateway"
     tags = ["networkservice"]
+
     definitions = {
         "CreateInternetGatewayApiRequestSchema": CreateInternetGatewayApiRequestSchema,
         "CreateInternetGatewayApiResponseSchema": CreateInternetGatewayApiResponseSchema,
     }
+
     parameters = SwaggerHelper().get_parameters(CreateInternetGatewayApiBodyRequestSchema)
     parameters_schema = CreateInternetGatewayApiRequestSchema
     responses = ServiceApiView.setResponses(
@@ -291,6 +324,7 @@ class CreateInternetGateway(ServiceApiView):
 
         # create service
         data["computeZone"] = parent_plugin.resource_uuid
+
         plugin: ApiNetworkGateway = serviceController.add_service_type_plugin(
             service_definition.oid,
             account_id,
@@ -299,7 +333,8 @@ class CreateInternetGateway(ServiceApiView):
             parent_plugin=parent_plugin,
             instance_config=data,
         )
-        plugin.post_get()
+
+        # plugin.post_get()
 
         res = {
             "CreateInternetGatewayResponse": {
@@ -312,14 +347,15 @@ class CreateInternetGateway(ServiceApiView):
                 },
             }
         }
+
         self.logger.debug("Service Aws response: %s" % res)
 
         return res, 202
 
 
-class DeleteInternetGatewayResponseItemSchema(Schema):
-    requestId = fields.String(required=True, example="123eduis9", default="The ID of the request")
-    nvl_return = fields.Boolean(required=True, example=True, data_key="return")
+class DeleteInternetGatewayResponseItemSchema(XmlnsSchema):
+    requestId = fields.String(required=True, dump_default="The ID of the request", metadata={"example": "123eduis9"})
+    nvl_return = fields.Boolean(required=True, data_key="return", metadata={"example": True})
 
 
 class DeleteInternetGatewayResponseSchema(Schema):
@@ -335,8 +371,7 @@ class DeleteInternetGatewayRequestSchema(Schema):
     InternetGatewayId = fields.String(
         required=True,
         context="query",
-        example="iu89-90sn",
-        description="The ID of the internet gateway.",
+        metadata={"example": "iu89-90sn", "description": "The ID of the internet gateway."},
     )
 
 
@@ -348,10 +383,12 @@ class DeleteInternetGateway(ServiceApiView):
     summary = "Terminate network gateway"
     description = "Terminate network gateway"
     tags = ["networkservice"]
+
     definitions = {
         "DeleteInternetGatewayRequestSchema": DeleteInternetGatewayRequestSchema,
         "DeleteInternetGatewayResponseSchema": DeleteInternetGatewayResponseSchema,
     }
+
     parameters = SwaggerHelper().get_parameters(DeleteInternetGatewayBodyRequestSchema)
     parameters_schema = DeleteInternetGatewayRequestSchema
     responses = SwaggerApiView.setResponses(
@@ -375,19 +412,22 @@ class DeleteInternetGateway(ServiceApiView):
         return res, 202
 
 
-class AttachInternetGateway1ResponseSchema(Schema):
-    requestId = fields.String(required=True, example="erc453", descritpion="request id")
+class AttachInternetGateway1ResponseSchema(XmlnsSchema):
+    requestId = fields.String(
+            required=True, metadata={"example": "erc453", "description": "request id"}
+    )
+
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="Is true if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "Is true if the request succeeds, and an error otherwise"},
     )
+
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -401,8 +441,8 @@ class AttachInternetGatewayResponseSchema(Schema):
 
 
 class AttachInternetGateway1RequestSchema(Schema):
-    InternetGatewayId = fields.String(required=True, context="query", description="The ID of the gateway")
-    VpcId = fields.String(required=True, context="query", description="The ID of the vpc")
+    InternetGatewayId = fields.String(required=True, context="query", metadata={"description": "The ID of the gateway"})
+    VpcId = fields.String(required=True, context="query", metadata={"description": "The ID of the vpc"})
 
 
 class AttachInternetGatewayRequestSchema(Schema):
@@ -417,15 +457,19 @@ class AttachInternetGateway(ServiceApiView):
     summary = "Attaches an internet gateway to a VPC"
     description = "Attaches an internet gateway to a VPC"
     tags = ["networkservice"]
+
     definitions = {
         "AttachInternetGatewayRequestSchema": AttachInternetGatewayRequestSchema,
         "AttachInternetGatewayResponseSchema": AttachInternetGatewayResponseSchema,
     }
+
     parameters = SwaggerHelper().get_parameters(AttachInternetGatewayBodyRequestSchema)
     parameters_schema = AttachInternetGatewayRequestSchema
+
     responses = SwaggerApiView.setResponses(
         {202: {"description": "success", "schema": AttachInternetGatewayResponseSchema}}
     )
+
     response_schema = AttachInternetGatewayResponseSchema
 
     def put(self, controller, data, *args, **kwargs):
@@ -449,19 +493,20 @@ class AttachInternetGateway(ServiceApiView):
         return res, 202
 
 
-class DetachInternetGateway1ResponseSchema(Schema):
-    requestId = fields.String(required=True, example="erc453", descritpion="request id")
+class DetachInternetGateway1ResponseSchema(XmlnsSchema):
+    requestId = fields.String(required=True, metadata={"example": "erc453", "description": "request id"})
+
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="Is true if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "Is true if the request succeeds, and an error otherwise"},
     )
+
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -475,8 +520,8 @@ class DetachInternetGatewayResponseSchema(Schema):
 
 
 class DetachInternetGateway1RequestSchema(Schema):
-    InternetGatewayId = fields.String(required=True, context="query", description="The ID of the gateway")
-    VpcId = fields.String(required=True, context="query", description="The ID of the vpc")
+    InternetGatewayId = fields.String(required=True, context="query", metadata={"description": "The ID of the gateway"})
+    VpcId = fields.String(required=True, context="query", metadata={"description": "The ID of the vpc"})
 
 
 class DetachInternetGatewayRequestSchema(Schema):
@@ -491,12 +536,15 @@ class DetachInternetGateway(ServiceApiView):
     summary = "Detaches an internet gateway to a VPC"
     description = "Detaches an internet gateway to a VPC"
     tags = ["networkservice"]
+
     definitions = {
         "DetachInternetGatewayRequestSchema": DetachInternetGatewayRequestSchema,
         "DetachInternetGatewayResponseSchema": DetachInternetGatewayResponseSchema,
     }
+
     parameters = SwaggerHelper().get_parameters(DetachInternetGatewayBodyRequestSchema)
     parameters_schema = DetachInternetGatewayRequestSchema
+
     responses = SwaggerApiView.setResponses(
         {202: {"description": "success", "schema": DetachInternetGatewayResponseSchema}}
     )
@@ -526,48 +574,53 @@ class DetachInternetGateway(ServiceApiView):
 class DescribeInternetGatewayBastion2ResponseSchema(Schema):
     nvl_name = fields.String(
         required=False,
-        example="test",
-        descriptiom="gateway bastion name",
         data_key="nvl-name",
+        metadata={"example": "test", "description": "gateway bastion name"},
     )
+
     nvl_state = fields.String(
         required=False,
-        example="pending",
         data_key="nvl-state",
-        description="state of the gateway bastion",
+        metadata={"example": "pending", "description": "state of the gateway bastion"},
     )
 
 
 class DescribeInternetGatewayBastion1ResponseSchema(Schema):
-    requestId = fields.String(required=True, example="ednundw83ldw", description="request id")
+    requestId = fields.String(required=True, metadata={"example": "ednundw83ldw", "description": "request id"})
+
     internetGatewayBastion = fields.Nested(
         DescribeInternetGatewayBastion2ResponseSchema,
         many=True,
         required=True,
-        description="internet gateway bastion",
+        metadata={"description": "internet gateway bastion"},
     )
 
 
 class DescribeInternetGatewayBastionResponseSchema(Schema):
     DescribeInternetGatewayBastionResponse = fields.Nested(
-        DescribeInternetGatewayBastion1ResponseSchema, required=True, allow_none=False
+        DescribeInternetGatewayBastion1ResponseSchema,
+        required=True,
+        allow_none=False,
     )
 
 
 class DescribeInternetGatewayBastionRequestSchema(Schema):
-    InternetGatewayId = fields.String(required=True, context="query", description="Internet gateway IDs")
+    InternetGatewayId = fields.String(required=True, context="query", metadata={"description": "Internet gateway IDs"})
 
 
 class DescribeInternetGatewayBastion(ServiceApiView):
     summary = "Get an internet gateway bastion"
     description = "Get an internet gateway bastion"
     tags = ["networkservice"]
+
     definitions = {
         "DescribeInternetGatewayBastionRequestSchema": DescribeInternetGatewayBastionRequestSchema,
         "DescribeInternetGatewayBastionResponseSchema": DescribeInternetGatewayBastionResponseSchema,
     }
+
     parameters = SwaggerHelper().get_parameters(DescribeInternetGatewayBastionRequestSchema)
     parameters_schema = DescribeInternetGatewayBastionRequestSchema
+
     responses = SwaggerApiView.setResponses(
         {
             202: {
@@ -576,6 +629,7 @@ class DescribeInternetGatewayBastion(ServiceApiView):
             }
         }
     )
+
     response_schema = DescribeInternetGatewayBastionResponseSchema
 
     def get(self, controller, data, *args, **kwargs):
@@ -593,19 +647,20 @@ class DescribeInternetGatewayBastion(ServiceApiView):
         return res, 202
 
 
-class CreateInternetGatewayBastion1ResponseSchema(Schema):
-    requestId = fields.String(required=True, example="erc453", descritpion="request id")
+class CreateInternetGatewayBastion1ResponseSchema(XmlnsSchema):
+    requestId = fields.String(required=True, metadata={"example": "erc453", "description": "request id"})
+
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="Is true if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "Is true if the request succeeds, and an error otherwise"},
     )
+
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -619,7 +674,7 @@ class CreateInternetGatewayBastionResponseSchema(Schema):
 
 
 class CreateInternetGatewayBastion1RequestSchema(Schema):
-    InternetGatewayId = fields.String(required=True, context="query", description="The ID of the gateway")
+    InternetGatewayId = fields.String(required=True, context="query", metadata={"description": "The ID of the gateway"})
 
 
 class CreateInternetGatewayBastionRequestSchema(Schema):
@@ -634,12 +689,15 @@ class CreateInternetGatewayBastion(ServiceApiView):
     summary = "Create an internet gateway bastion"
     description = "Create an internet gateway bastion"
     tags = ["networkservice"]
+
     definitions = {
         "CreateInternetGatewayBastionRequestSchema": CreateInternetGatewayBastionRequestSchema,
         "CreateInternetGatewayBastionResponseSchema": CreateInternetGatewayBastionResponseSchema,
     }
+
     parameters = SwaggerHelper().get_parameters(CreateInternetGatewayBastionBodyRequestSchema)
     parameters_schema = CreateInternetGatewayBastionRequestSchema
+
     responses = SwaggerApiView.setResponses(
         {
             202: {
@@ -648,6 +706,7 @@ class CreateInternetGatewayBastion(ServiceApiView):
             }
         }
     )
+
     response_schema = CreateInternetGatewayBastionResponseSchema
 
     def post(self, controller, data, *args, **kwargs):
@@ -667,19 +726,20 @@ class CreateInternetGatewayBastion(ServiceApiView):
         return res, 202
 
 
-class DeleteInternetGatewayBastion1ResponseSchema(Schema):
-    requestId = fields.String(required=True, example="erc453", descritpion="request id")
+class DeleteInternetGatewayBastion1ResponseSchema(XmlnsSchema):
+    requestId = fields.String(required=True, metadata={"example": "erc453", "description": "request id"})
+
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="Is true if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "Is true if the request succeeds, and an error otherwise"},
     )
+
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -693,7 +753,7 @@ class DeleteInternetGatewayBastionResponseSchema(Schema):
 
 
 class DeleteInternetGatewayBastion1RequestSchema(Schema):
-    InternetGatewayId = fields.String(required=True, context="query", description="The ID of the gateway")
+    InternetGatewayId = fields.String(required=True, context="query", metadata={"description": "The ID of the gateway"})
 
 
 class DeleteInternetGatewayBastionRequestSchema(Schema):
@@ -708,12 +768,15 @@ class DeleteInternetGatewayBastion(ServiceApiView):
     summary = "Delete an internet gateway bastion"
     description = "Delete an internet gateway bastion"
     tags = ["networkservice"]
+
     definitions = {
         "DeleteInternetGatewayBastionRequestSchema": DeleteInternetGatewayBastionRequestSchema,
         "DeleteInternetGatewayBastionResponseSchema": DeleteInternetGatewayBastionResponseSchema,
     }
+
     parameters = SwaggerHelper().get_parameters(DeleteInternetGatewayBastionBodyRequestSchema)
     parameters_schema = DeleteInternetGatewayBastionRequestSchema
+
     responses = SwaggerApiView.setResponses(
         {
             202: {

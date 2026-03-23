@@ -1,10 +1,10 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from flasgger import Schema
-from six import ensure_text
+from beecell.util import ensure_text
 from beehive_service.views import ServiceApiView, NotEmptyString
 from beecell.swagger import SwaggerHelper
 from flasgger.marshmallow_apispec import fields
@@ -16,7 +16,7 @@ from beehive_service.plugins.computeservice.controller import (
     ApiComputeSecurityGroup,
     ApiComputeService,
 )
-from beehive.common.apimanager import SwaggerApiView, ApiView
+from beehive.common.apimanager import SwaggerApiView, ApiView, XmlnsSchema
 from beecell.types.type_string import is_blank
 from ipaddress import IPv4Address, IPv6Network, AddressValueError
 from beehive_service.service_util import (
@@ -29,44 +29,36 @@ from beehive_service.controller import ServiceController
 
 
 class InstanceTagSetResponseSchema(Schema):
-    key = fields.String(required=False, allow_none=True, description="tag key")
-    value = fields.String(required=False, allow_none=True, description="tag value")
+    key = fields.String(required=False, allow_none=True, metadata={"description": "tag key"})
+    value = fields.String(required=False, allow_none=True, metadata={"description": "tag value"})
 
 
 class PrefixListIdSchema(Schema):
-    prefixListId = fields.String(example="", required=False, allow_none=True, description="ID of the prefix")
+    prefixListId = fields.String(required=False, allow_none=True, metadata={"description": "ID of the prefix"})
     description = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="Description of security group for  the prefix id",
+        metadata={"description": "Description of security group for  the prefix id"},
     )
 
 
 class IpRangeResponseSchema(Schema):
-    cidrIp = fields.String(example="", required=False, allow_none=True, description="IPv4 CIDR")
-    description = fields.String(
-        example="",
-        required=False,
-        allow_none=True,
-        description="Description of IPv4 CIDR",
-    )
+    cidrIp = fields.String(required=False, allow_none=True, metadata={"description": "IPv4 CIDR"})
+    description = fields.String(required=False, allow_none=True, metadata={"description": "Description of IPv4 CIDR"})
 
 
 class IpRangeRequestSchema(Schema):
     CidrIp = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="IPv4 CIDR (supported format:xxx.xxx.xxx.xxx/xx)",
         context="query",
+        metadata={"description": "IPv4 CIDR (supported format:xxx.xxx.xxx.xxx/xx)"},
     )
     Description = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="Description of IPv4 CIDR",
         context="query",
+        metadata={"description": "Description of IPv4 CIDR"},
     )
 
     @validates("CidrIp")
@@ -84,13 +76,8 @@ class IpRangeRequestSchema(Schema):
 
 
 class Ipv6RangeResponseSchema(Schema):
-    cidrIpv6 = fields.String(example="", required=False, allow_none=True, description="IPv6 CIDR")
-    description = fields.String(
-        example="",
-        required=False,
-        allow_none=True,
-        description="Description of IPv6 CIDR",
-    )
+    cidrIpv6 = fields.String(required=False, allow_none=True, metadata={"description": "IPv6 CIDR"})
+    description = fields.String(required=False, allow_none=True, metadata={"description": "Description of IPv6 CIDR"})
 
     @validates("cidrIpv6")
     def validate_cidr_ipv6(self, cidr_ipv6):
@@ -105,56 +92,40 @@ class Ipv6RangeResponseSchema(Schema):
 
 
 class Ipv6RangeRequestSchema(Schema):
-    CidrIpv6 = fields.String(
-        example="",
-        required=False,
-        allow_none=True,
-        description="IPv6 CIDR",
-        context="query",
-    )
+    CidrIpv6 = fields.String(required=False, allow_none=True, context="query", metadata={"description": "IPv6 CIDR"})
     Description = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="Description of IPv6 CIDR",
         context="query",
+        metadata={"description": "Description of IPv6 CIDR"},
     )
 
 
 class UserIdGroupPairResponseSchema(Schema):
     description = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="description for the security group rule",
+        metadata={"description": "description for the security group rule"},
     )
-    groupName = fields.String(
-        example="",
-        required=False,
-        allow_none=True,
-        description="name of the security group",
-    )
-    groupId = fields.String(example="", required=False, allow_none=True, description="security group id")
+    groupName = fields.String(required=False, allow_none=True, metadata={"description": "name of the security group"})
+    groupId = fields.String(required=False, allow_none=True, metadata={"description": "security group id"})
     peeringStatus = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="status of a VPC peering connection",
+        metadata={"description": "status of a VPC peering connection"},
     )
-    userId = fields.String(example="", required=False, allow_none=True, description="account id")
+    userId = fields.String(required=False, allow_none=True, metadata={"description": "account id"})
     nvl_userName = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="account name or id",
         data_key="nvl-userName",
+        metadata={"description": "account name or id"},
     )
-    vpcId = fields.String(example="", required=False, allow_none=True, description="vpc id")
+    vpcId = fields.String(required=False, allow_none=True, metadata={"description": "vpc id"})
     vpcPeeringConnectionId = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="id of the VPC peering connection",
+        metadata={"description": "id of the VPC peering connection"},
     )
 
 
@@ -165,11 +136,10 @@ class UserIdGroupPairRequestSchema(Schema):
     # GroupId = fields.String(example='', required=False, allow_none=True,
     #                         description='security group rule name', context='query')
     GroupName = fields.String(
-        example="",
         required=False,
-        description="security group rule name",
         context="query",
         validate=Regexp(__REGEX_AWS_SG_NAME_AND_DESC__),
+        metadata={"description": "security group rule name"},
     )
     # PeeringStatus = fields.String(example='', required=False, allow_none=True,
     #                               description='status of a VPC peering connection', context='query')
@@ -181,172 +151,173 @@ class UserIdGroupPairRequestSchema(Schema):
 
 class IpPermissionsParameterResponseSchema(Schema):
     fromPort = fields.Integer(
-        example="",
         required=False,
         allow_none=True,
-        description="start of port range for the protocols",
+        metadata={"description": "start of port range for the protocols"},
     )
     toPort = fields.Integer(
-        example="",
         required=False,
         allow_none=True,
-        description="end of port range for the protocols",
+        metadata={"description": "end of port range for the protocols"},
     )
     ipProtocol = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="IP protocol for a security group rule",
+        metadata={"description": "IP protocol for a security group rule"},
     )
     prefixListIds = fields.Nested(
         PrefixListIdSchema,
         many=True,
         required=False,
         allow_none=True,
-        description="one or more prefix list IDs for a service",
+        metadata={"description": "one or more prefix list IDs for a service"},
     )
     ipRanges = fields.Nested(
         IpRangeResponseSchema,
         many=True,
         required=False,
         allow_none=True,
-        description="one or more ipv4 range",
+        metadata={"description": "one or more ipv4 range"},
     )
     ipv6Ranges = fields.Nested(
         Ipv6RangeResponseSchema,
         many=True,
         required=False,
         allow_none=True,
-        description="one or more ipv6 range",
+        metadata={"description": "one or more ipv6 range"},
     )
     groups = fields.Nested(
         UserIdGroupPairResponseSchema,
         many=True,
         required=False,
         allow_none=True,
-        description="ine or more security group and account ID pairs",
+        metadata={"description": "ine or more security group and account ID pairs"},
     )
     nvl_state = fields.String(
         required=False,
         allow_none=True,
-        description="state of security group rule",
         data_key="nvl-state",
+        metadata={"description": "state of security group rule"},
     )
     nvl_reserved = fields.Boolean(
         required=False,
         allow_none=True,
-        description="check if rule for security group is reserved",
         data_key="nvl-reserved",
+        metadata={"description": "check if rule for security group is reserved"},
     )
 
 
 class IpPermissionsParameterRequestSchema(Schema):
     FromPort = fields.Integer(
         required=False,
-        missing=-1,
-        example="",
+        load_default=-1,
         context="query",
-        description="start of port range for the protocols tcp, udp. Subprotocol for icmp",
+        metadata={"description": "start of port range for the protocols tcp, udp. Subprotocol for icmp"},
     )
     ToPort = fields.Integer(
         required=False,
-        missing=-1,
-        example="",
+        load_default=-1,
         context="query",
-        description="end of port range for the protocols",
+        metadata={"description": "end of port range for the protocols"},
     )
     IpProtocol = fields.String(
         required=False,
         validate=OneOf(["tcp", "udp", "icmp", "-1"]),
-        description="IP protocol for security group rule",
         context="query",
+        metadata={"description": "IP protocol for security group rule"},
     )
     prefixListIds = fields.Nested(
         PrefixListIdSchema,
         many=True,
         required=False,
-        description="One or more prefix list IDs for a service",
         context="query",
+        metadata={"description": "One or more prefix list IDs for a service"},
     )
     IpRanges = fields.Nested(
         IpRangeRequestSchema,
         many=True,
         required=False,
-        description="one or more ipv4 range",
         validation=(lambda n: 0 <= n <= 6553 or n == -1),
         context="query",
+        metadata={"description": "one or more ipv4 range"},
     )
     Ipv6Ranges = fields.Nested(
         Ipv6RangeRequestSchema,
         many=True,
         required=False,
         context="query",
-        description="one or more ipv6 range",
+        metadata={"description": "one or more ipv6 range"},
     )
     UserIdGroupPairs = fields.Nested(
         UserIdGroupPairRequestSchema,
         many=True,
         required=False,
         context="query",
-        description="One or more security group and account ID pairs",
+        metadata={"description": "One or more security group and account ID pairs"},
+    )
+    RuleLogging = fields.Boolean(
+        # campo useless, ripristinato per errore Jira NSP-4070
+        required=False,
+        load_default=True,
+        context="query",
+        metadata={"description": "If 'True' rule is logged"},
+    )
+    ForceAdd = fields.Boolean(
+        # campo useless, questa opzione è stata rimossa
+        required=False,
+        load_default=False,
+        context="query",
+        metadata={"description": "Force the creation of the rule even when a general egress rule to any destination "
+                    "for any protocol and port already exists in security group"},
     )
 
 
 class IpPermissionsSGParameterResponseSchema(Schema):
     ip_permission_cidr_N = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="IPv4 CIDR block for an inbound security group rule",
+        metadata={"description": "IPv4 CIDR block for an inbound security group rule"},
     )
     ip_permission_from_port_N = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="For an inbound rule, the start of port range for the TCP "
-        "and UDP protocols, or an ICMP type number",
+        metadata={"description": "For an inbound rule, the start of port range for the TCP "
+        "and UDP protocols, or an ICMP type number"},
     )
     ip_permission_group_id_N = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="ID of a security group that has been referenced in an " "inbound security group rule",
+        metadata={"description": "ID of a security group that has been referenced in an " "inbound security group rule"},
     )
     ip_permission_group_name_N = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="ID of a security group that has been referenced in an " "inbound security group rule",
+        metadata={"description": "ID of a security group that has been referenced in an " "inbound security group rule"},
     )
     ip_permission_ipv6_cidr_N = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="IPv6 CIDR block for an inbound security group rule",
+        metadata={"description": "IPv6 CIDR block for an inbound security group rule"},
     )
     ip_permission_prefix_list_id_N = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="The ID (prefix) of the service to which a security " "group rule allows inbound access",
+        metadata={"description": "The ID (prefix) of the service to which a security " "group rule allows inbound access"},
     )
     ip_permission_protocol_N = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="IP protocol for an inbound security group rule",
+        metadata={"description": "IP protocol for an inbound security group rule"},
     )
     ip_permission_to_port_N = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="port range for the protocols",
+        metadata={"description": "port range for the protocols"},
     )
     ip_permission_user_id_N = fields.String(
-        example="",
         required=False,
         allow_none=True,
-        description="ID of an  account that has been referenced in an inbound " "security group rule",
+        metadata={"description": "ID of an  account that has been referenced in an inbound " "security group rule"},
     )
 
 
@@ -354,16 +325,14 @@ class SecurityGroupStateReasonResponseSchema(Schema):
     nvl_code = fields.Integer(
         required=False,
         allow_none=True,
-        example="400",
-        description="state code",
         data_key="nvl-code",
+        metadata={"example": "400", "description": "state code"},
     )
     nvl_message = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="state message",
         data_key="nvl-message",
+        metadata={"description": "state message"},
     )
 
 
@@ -371,69 +340,63 @@ class SecurityGroupItemParameterResponseSchema(Schema):
     groupDescription = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="instance security group description",
+        metadata={"description": "instance security group description"},
     )
     groupId = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="instance security group identifier",
+        metadata={"description": "instance security group identifier"},
     )
-    groupName = fields.String(
-        required=False,
-        allow_none=True,
-        example="",
-        description="instance security group name",
-    )
+    groupName = fields.String(required=False, allow_none=True, metadata={"description": "instance security group name"})
     ipPermissions = fields.Nested(
         IpPermissionsParameterResponseSchema,
         required=False,
         many=True,
         allow_none=True,
-        description="One or more inbound rules associated with the security group",
+        metadata={"description": "One or more inbound rules associated with the security group"},
     )
     ipPermissionsEgress = fields.Nested(
         IpPermissionsParameterResponseSchema,
         required=False,
         many=True,
         allow_none=True,
-        description="One or more outbound rules associated with the security group",
+        metadata={"description": "One or more outbound rules associated with the security group"},
     )
     ownerId = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="account ID of the owner of the instance security group",
+        metadata={"description": "account ID of the owner of the instance security group"},
     )
     tagSet = fields.Nested(InstanceTagSetResponseSchema, many=True, required=False, allow_none=True)
-    vpcId = fields.String(required=False, allow_none=True, example="", descriptiom="ID of VPC")
+
+    vpcId = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={"description": "ID of VPC"},
+    )
+
     nvl_vpcName = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        descriptiom="Name of the VPC",
         data_key="nvl-vpcName",
+        metadata={"description": "Name of the VPC"},
     )
+
     nvl_sgOwnerId = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        descriptiom="ID of the account that owns the security group",
+        metadata={"description": "ID of the account that owns the security group"},
         data_key="nvl-sgOwnerId",
     )
     nvl_sgOwnerAlias = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        descriptiom="Alias name of the account that owns the security group",
+        metadata={"description": "Alias name of the account that owns the security group"},
         data_key="nvl-sgOwnerAlias",
     )
 
     nvl_state = fields.String(
         required=False,
-        example="",
-        description="state of the SecurityGroup",
         data_key="nvl-state",
         validate=OneOf(
             [
@@ -442,6 +405,7 @@ class SecurityGroupItemParameterResponseSchema(Schema):
                 if not x.startswith("__")
             ]
         ),
+        metadata={"description": "state of the SecurityGroup"},
     )
     # ['pending', 'available', 'deregistering', 'deregistered', 'transient', 'error', 'updating', 'unknown']
     nvl_stateReason = fields.Nested(
@@ -464,9 +428,8 @@ class DescribeSecurityGroups1ResponseSchema(Schema):
     )
     nvl_securityGroupTotal = fields.Integer(
         required=False,
-        example="0",
-        descriptiom="total security group",
         data_key="nvl-securityGroupTotal",
+        metadata={"example": 0, "description": "total security group"},
     )
     xmlns = fields.String(required=False, data_key="$xmlns")
 
@@ -488,7 +451,7 @@ class DescribeSecurityGroupsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="owner-id.N",
-        description="account ID  of the security_group owner",
+        metadata={"description": "account ID  of the security_group owner"},
     )
     # description_N = fields.List(fields.String(example=''), required=False, allow_none=True,
     #                             context='query', collection_format='multi', data_key='description.N',
@@ -541,7 +504,7 @@ class DescribeSecurityGroupsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="group-id.N",
-        description="ID of the security group",
+        metadata={"description": "ID of the security group"},
     )
     group_name_N = fields.List(
         fields.String(example=""),
@@ -550,7 +513,7 @@ class DescribeSecurityGroupsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="group-name.N",
-        description="Name of the security group",
+        metadata={"description": "Name of the security group"},
     )
     # ip_permission_cidr_N = fields.List(fields.String(example=''), required=False, allow_none=True,
     #                                    context='query', collection_format='multi', data_key='ip-permission.cidr.N',
@@ -599,7 +562,7 @@ class DescribeSecurityGroupsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="tag-key.N",
-        descriptiom="value of a tag assigned to the resource",
+        metadata={"description": "value of a tag assigned to the resource"},
     )
     vpc_id_N = fields.List(
         fields.String(example=""),
@@ -608,7 +571,7 @@ class DescribeSecurityGroupsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="vpc-id.N",
-        description="One or more VPC IDs",
+        metadata={"description": "One or more VPC IDs"},
     )
     GroupId_N = fields.List(
         fields.String(example=""),
@@ -617,7 +580,7 @@ class DescribeSecurityGroupsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="GroupId.N",
-        description="One or more security group IDs",
+        metadata={"description": "One or more security group IDs"},
     )
     GroupName_N = fields.List(
         fields.String(example=""),
@@ -626,10 +589,10 @@ class DescribeSecurityGroupsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="GroupName.N",
-        description="One or more security group names",
+        metadata={"description": "One or more security group names"},
     )
-    MaxResults = fields.Integer(required=False, default=0, description="", context="query")
-    NextToken = fields.String(required=False, default="1", description="", context="query")
+    MaxResults = fields.Integer(required=False, dump_default=0, context="query", metadata={"description": ""})
+    NextToken = fields.String(required=False, dump_default="1", context="query", metadata={"description": ""})
 
 
 class DescribeSecurityGroups(ServiceApiView):
@@ -703,6 +666,7 @@ class DescribeSecurityGroups(ServiceApiView):
 
 
 class CreateSecurityGroupApiResponse1Schema(Schema):
+    xmlns = fields.String(required=False, data_key="__xmlns")
     groupId = fields.String(required=True, allow_none=False)
     requestId = fields.String(required=True, allow_none=True)
 
@@ -715,16 +679,14 @@ class CreateSecurityGroupParamApiRequestSchema(Schema):
     # owner_id = fields.String(required=True, example='', description='account id')
     GroupDescription = fields.String(
         required=False,
-        default="",
-        example="",
-        description="a description for the security group",
+        dump_default="",
+        metadata={"description": "a description for the security group"},
     )
-    GroupName = fields.String(required=True, example="", description="name of the security group")
+    GroupName = fields.String(required=True, metadata={"description": "name of the security group"})
     VpcId = fields.String(
         required=True,
-        example="",
-        description="ID of the VPC",
         validate=Length(1, error="VpcId Must not be Empty"),
+        metadata={"description": "ID of the VPC"},
     )
     GroupType = NotEmptyString(required=False, description="security group template", allow_none=True)
 
@@ -814,8 +776,7 @@ class PatchSecurityGroupApiResponseSchema(Schema):
 
 
 class PatchSecurityGroupParamApiRequestSchema(Schema):
-    GroupName = fields.String(required=True, example="", description="uuid of the security group")
-    # GroupType = fields.String(required=False, missing=None, description='security group template', allow_none=True)
+    GroupName = fields.String(required=True, metadata={"description": "uuid of the security group"})
 
 
 class PatchSecurityGroupApiRequestSchema(Schema):
@@ -859,6 +820,7 @@ class PatchSecurityGroup(ServiceApiView):
 
 
 class DeleteSecurityGroupApiResponse1Schema(Schema):
+    xmlns = fields.String(required=False, data_key="__xmlns")
     return_ = fields.Boolean(required=True, allow_none=False, data_key="return")
     requestId = fields.String(required=True, allow_none=True)
 
@@ -868,7 +830,7 @@ class DeleteSecurityGroupApiResponseSchema(Schema):
 
 
 class DeleteSecurityGroupParamApiRequestSchema(Schema):
-    GroupName = fields.String(required=True, example="", description="uuid of the security group")
+    GroupName = fields.String(required=True, metadata={"description": "uuid of the security group"})
 
 
 class DeleteSecurityGroupApiRequestSchema(Schema):
@@ -917,15 +879,15 @@ class DeleteSecurityGroup(ServiceApiView):
         return res, 202
 
 
-class AuthorizeSGroupEgressApi1ResponseSchema(Schema):
+class AuthorizeSGroupEgressApi1ResponseSchema(XmlnsSchema):
     # Return is return in aws
-    Return = fields.Boolean(required=True, example=True, allow_none=False)
+    Return = fields.Boolean(required=True, allow_none=False, metadata={"example": True})
     requestId = fields.String(required=True, allow_none=True)
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -940,19 +902,20 @@ class AuthorizeSGroupEgressApiResponseSchema(Schema):
 
 class AuthorizeSGroupEgressParamsApiRequestSchema(Schema):
     # GroupId = fields.String(required=True, example='', description='id of the security group')
-    GroupName = fields.String(
-        required=False,
-        example="",
-        description="name of the security group",
-        context="query",
-    )
+    GroupName = fields.String(required=False, context="query", metadata={"description": "name of the security group"})
     IpPermissions_N = fields.List(
         fields.Nested(IpPermissionsParameterRequestSchema),
         required=False,
         context="query",
         collection_format="multi",
         data_key="IpPermissions.N",
-        description="sets of ip permission",
+        metadata={"description": "sets of ip permission"},
+    )
+    orchestrators = fields.String(
+        required=False,
+        context="query",
+        allow_none=True,
+        metadata={"description": "orchestrators comma separated: openstack, vsphere"},
     )
 
     # deprecated
@@ -1022,7 +985,7 @@ class AuthorizeSecurityGroupEgress(ServiceApiView):
         data = data.get("rule")
         sg_uuid = data.get("GroupName", None)
 
-        type_plugin = controller.get_service_type_plugin(sg_uuid)
+        type_plugin: ApiComputeSecurityGroup = controller.get_service_type_plugin(sg_uuid)
         return_value = type_plugin.aws_create_rule(type_plugin.instance, data, __RULE_GROUP_EGRESS__)
 
         res = {
@@ -1037,13 +1000,14 @@ class AuthorizeSecurityGroupEgress(ServiceApiView):
 
 
 class AuthorizeSGroupIngressApi1ResponseSchema(Schema):
-    Return = fields.Boolean(required=True, example=True, allow_none=False, data_key="return")
-    requestId = fields.String(required=True, example="", allow_none=True)
+    xmlns = fields.String(required=False, allow_none=True, data_key="__xmlns")
+    Return = fields.Boolean(required=True, allow_none=False, data_key="return", metadata={"example": True})
+    requestId = fields.String(required=True, allow_none=True)
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -1059,19 +1023,20 @@ class AuthorizeSGroupIngressApiResponseSchema(Schema):
 class AuthorizeSGroupIngressParamsApiRequestSchema(Schema):
     # GroupId = fields.String(required=False, allow_none=True, example='', description='id of the security group',
     #                         context='query')
-    GroupName = fields.String(
-        required=False,
-        example="",
-        description="name of the security group",
-        context="query",
-    )
+    GroupName = fields.String(required=False, context="query", metadata={"description": "name of the security group"})
     IpPermissions_N = fields.List(
         fields.Nested(IpPermissionsParameterRequestSchema),
         required=False,
         collection_format="multi",
         data_key="IpPermissions.N",
-        description="sets of ip permission",
         context="query",
+        metadata={"description": "sets of ip permission"},
+    )
+    orchestrators = fields.String(
+        required=False,
+        context="query",
+        allow_none=True,
+        metadata={"description": "orchestrators comma separated: openstack, vsphere"},
     )
 
     # deprecated
@@ -1152,13 +1117,14 @@ class AuthorizeSecurityGroupIngress(ServiceApiView):
 
 class RevokeSGroupEgressApi1ResponseSchema(Schema):
     # Return is return in aws
-    Return = fields.Boolean(required=True, example=True, allow_none=False)
+    xmlns = fields.String(required=False, allow_none=True, data_key="__xmlns")
+    Return = fields.Boolean(required=True, allow_none=False, metadata={"example": True})
     requestId = fields.String(required=True, allow_none=True)
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -1173,19 +1139,14 @@ class RevokeSGroupEgressApiResponseSchema(Schema):
 
 class RevokeSGroupEgressParamsApiRequestSchema(Schema):
     # GroupId = fields.String(required=True, example='', description='id of the security group')
-    GroupName = fields.String(
-        required=False,
-        example="",
-        description="name of the security group",
-        context="query",
-    )
+    GroupName = fields.String(required=False, context="query", metadata={"description": "name of the security group"})
     IpPermissions_N = fields.List(
         fields.Nested(IpPermissionsParameterRequestSchema),
         required=False,
         context="query",
         collection_format="multi",
         data_key="IpPermissions.N",
-        description="sets of ip permission",
+        metadata={"description": "sets of ip permission"},
     )
 
     @validates_schema
@@ -1248,15 +1209,16 @@ class RevokeSecurityGroupEgress(ServiceApiView):
         return res, 202
 
 
-class RevokeSGroupIngressApi1ResponseSchema(Schema):
+class RevokeSGroupIngressApi1ResponseSchema(XmlnsSchema):
     # Return is return in aws
-    Return = fields.Boolean(required=True, example=True, allow_none=False)
-    requestId = fields.String(required=True, example="", allow_none=True)
+    xmlns = fields.String(required=False, allow_none=True, data_key="__xmlns")
+    Return = fields.Boolean(required=True, allow_none=False, metadata={"example": True})
+    requestId = fields.String(required=True, allow_none=True)
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -1272,19 +1234,14 @@ class RevokeSGroupIngressApiResponseSchema(Schema):
 class RevokeSGroupIngressParamsApiRequestSchema(Schema):
     # GroupId = fields.String(required=False, allow_none=True, example='', description='id of the security group',
     #                         context='query')
-    GroupName = fields.String(
-        required=False,
-        example="",
-        description="name of the security group",
-        context="query",
-    )
+    GroupName = fields.String(required=False, context="query", metadata={"description": "name of the security group"})
     IpPermissions_N = fields.List(
         fields.Nested(IpPermissionsParameterRequestSchema),
         required=False,
         collection_format="multi",
         data_key="IpPermissions.N",
-        description="sets of ip permission",
         context="query",
+        metadata={"description": "sets of ip permission"},
     )
 
     @validates_schema
@@ -1336,7 +1293,7 @@ class RevokeSecurityGroupIngress(ServiceApiView):
         data = data.get("rule")
         sg_uuid = data.get("GroupName", None)
 
-        type_plugin = controller.get_service_type_plugin(sg_uuid)
+        type_plugin: ApiComputeSecurityGroup = controller.get_service_type_plugin(sg_uuid)
         return_value = type_plugin.aws_delete_rule(type_plugin.instance, data, __RULE_GROUP_INGRESS__)
 
         res = {

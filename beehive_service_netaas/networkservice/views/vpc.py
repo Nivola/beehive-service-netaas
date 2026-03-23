@@ -1,15 +1,16 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 from beehive_service.controller import ServiceController, ApiServiceDefinition
-from flasgger import Schema
+from flasgger import Schema, fields
 from beehive.common.apimanager import ApiView, ApiManagerError
 from beehive.common.data import operation
 from beehive_service.model.base import SrvStatusType
 from beehive_service.views import ServiceApiView
 from beecell.swagger import SwaggerHelper
-from flasgger.marshmallow_apispec import fields
+
+# from flasgger.marshmallow_apispec import fields
 from marshmallow.validate import OneOf
 from beehive_service.plugins.computeservice.controller import (
     ApiComputeVPC,
@@ -19,8 +20,8 @@ from beehive_service_netaas.networkservice.validation import validate_network
 
 
 class InstanceTagSetResponseSchema(Schema):
-    key = fields.String(required=False, allow_none=True, description="tag key")
-    value = fields.String(required=False, allow_none=True, description="tag value")
+    key = fields.String(required=False, allow_none=True, metadata={"description": "tag key"})
+    value = fields.String(required=False, allow_none=True, metadata={"description": "tag value"})
 
 
 class VpcIpv6CidrBlockAssociationResponseSchema(Schema):
@@ -31,8 +32,6 @@ class VpcCidrBlockStateResponseSchema(Schema):
     state = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="state of the CIDR block",
         validate=OneOf(
             [
                 "associating",
@@ -43,12 +42,12 @@ class VpcCidrBlockStateResponseSchema(Schema):
                 "failed",
             ]
         ),
+        metadata={"description": "state of the CIDR block"},
     )
     statusMessage = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="message about the status of the CIDR block",
+        metadata={"description": "message about the status of the CIDR block"},
     )
 
 
@@ -56,10 +55,9 @@ class VpcCidrBlockAssociationResponseSchema(Schema):
     associationId = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="association ID for the IPv4 CIDR block",
+        metadata={"description": "association ID for the IPv4 CIDR block"},
     )
-    cidrBlock = fields.String(required=False, allow_none=True, example="", description="IPv4 CIDR block")
+    cidrBlock = fields.String(required=False, allow_none=True, metadata={"description": "IPv4 CIDR block"})
     cidrBlockState = fields.Nested(VpcCidrBlockStateResponseSchema, many=False, required=False, allow_none=True)
 
 
@@ -67,98 +65,103 @@ class VpcItemParameterResponseSchema(Schema):
     cidrBlock = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="primary IPv4 CIDR block for the VPC",
+        metadata={"description": "primary IPv4 CIDR block for the VPC"},
     )
+
     cidrBlockAssociationSet = fields.Nested(
         VpcCidrBlockAssociationResponseSchema,
         required=False,
         many=True,
         allow_none=True,
-        description="IPv4 CIDR blocks associated with the VPC",
+        metadata={"description": "IPv4 CIDR blocks associated with the VPC"},
     )
+
     dhcpOptionsId = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="ID of the set of DHCP options associated with VPC",
+        metadata={"description": "ID of the set of DHCP options associated with VPC"},
     )
+
     instanceTenancy = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="allowed tenancy of instances launched into the VPC",
         validate=OneOf(["default", "dedicated", "host"]),
+        metadata={"description": "allowed tenancy of instances launched into the VPC"},
     )
+
     ipv6CidrBlockAssociationSet = fields.Nested(
         VpcIpv6CidrBlockAssociationResponseSchema,
         required=False,
         many=True,
         allow_none=True,
-        description="IPv6 CIDR blocks associated with the VPC",
+        metadata={"description": "IPv6 CIDR blocks associated with the VPC"},
     )
-    isDefault = fields.Boolean(required=None, description="Indicates whether the VPC is the default VPC")
+
+    isDefault = fields.Boolean(required=None, metadata={"description": "Indicates whether the VPC is the default VPC"})
+
     state = fields.String(
         required=False,
         allow_none=True,
-        example="pending",
-        description="state of the VPC (pending | available | transient | error)",
         validate=OneOf(
             [getattr(ApiComputeVPC.state_enum, x) for x in dir(ApiComputeVPC.state_enum) if not x.startswith("__")]
         ),
+        metadata={"example": "pending", "description": "state of the VPC (pending | available | transient | error)"},
     )
+
     tagSet = fields.Nested(InstanceTagSetResponseSchema, many=True, required=False, allow_none=True)
-    vpcId = fields.String(required=False, allow_none=True, example="12", description="ID of the VPC")
+    vpcId = fields.String(required=False, allow_none=True, metadata={"example": "12", "description": "ID of the VPC"})
 
     nvl_name = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        descriptiom="service instance name",
         data_key="nvl-name",
+        metadata={"description": "service instance name"},
     )
+
     nvl_vpcName = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        descriptiom="vpc name",
         data_key="nvl-vpcName",
+        metadata={"description": "vpc name"},
     )
+
     nvl_vpcOwnerId = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        descriptiom="Id of the account that owns the VPC",
         data_key="nvl-vpcOwnerId",
+        metadata={"description": "Id of the account that owns the VPC"},
     )
+
     nvl_vpcOwnerAlias = fields.String(
         required=False,
         allow_none=True,
-        example="",
         data_key="nvl-vpcOwnerAlias",
-        descriptiom="alias of the account that owns the VPC",
+        metadata={"description": "alias of the account that owns the VPC"},
     )
+
     ownerId = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        descriptiom="ID of the account that owns the vpc",
+        metadata={"description": "ID of the account that owns the vpc"},
     )
 
     nvl_resourceId = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        descriptiom="vpc resource id",
+        metadata={"description": "vpc resource id"},
         data_key="nvl-resourceId",
     )
 
 
 class DescribeVpcsResponse1Schema(Schema):
-    requestId = fields.String(required=True, allow_none=True, example="", description="")
+    requestId = fields.String(required=True, allow_none=True, metadata={"description": ""})
     vpcSet = fields.Nested(VpcItemParameterResponseSchema, many=True, required=False, allow_none=True)
     xmlns = fields.String(required=False, data_key="$xmlns")
-    nvl_vpcTotal = fields.Integer(required=True, description="total number of vpc", data_key="nvl-vpcTotal")
+    nvl_vpcTotal = fields.Integer(
+        required=True,
+        data_key="nvl-vpcTotal",
+        metadata={"description": "total number of vpc"},
+    )
 
 
 class DescribeVpcsResponseSchema(Schema):
@@ -173,48 +176,8 @@ class DescribeVpcsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="owner-id.N",
-        description="account ID of the vpc owner",
+        metadata={"description": "account ID of the vpc owner"},
     )
-    # cidr_N = fields.List(fields.String(example=''), required=False, allow_none=True,
-    #                      context='query', collection_format='multi', data_key='cidr.N',
-    #                      description='primary IPv4 CIDR block of the VPC')
-    # cidr_block_association_cidr_block_N = fields.List(fields.String(example=''), required=False, allow_none=True,
-    #                                                   context='query', collection_format='multi',
-    #                                                   data_key='cidr-block-association.cidr-block.N',
-    #                                                   description='IPv4 CIDR block associated with the VPC')
-    # cidr_block_association_association_id_N = fields.List(fields.String(example=''), required=False, allow_none=True,
-    #                                                       context='query', collection_format='multi',
-    #                                                       data_key='cidr-block-association.cidr-block.N',
-    #                                                       descriptiom='association ID for an IPv4 CIDR block '
-    #                                                                   'associated with the VPC')
-    # cidr_block_association_state_N = fields.List(fields.String(example=''), required=False, allow_none=True,
-    #                                              context='query', collection_format='multi',
-    #                                              data_key='cidr-block-association.state.N',
-    #                                              descriptiom='state of an IPv4 CIDR block associated with the VPC')
-    # dhcp_options_id_N = fields.List(fields.String(example=''), required=False, allow_none=True,
-    #                                 context='query', collection_format='multi', data_key='dhcp-options-id.N',
-    #                                 description='ID of a set of DHCP options')
-    # ipv6_cidr_block_association_ipv6_cidr_block_N = fields.List(fields.String(example=''), required=False,
-    #                                                             allow_none=True, context='query',
-    #                                                             collection_format='multi',
-    #                                                             data_key='ipv6-cidr-block-association.ipv6-'
-    #                                                                       'cidr-block.N',
-    #                                                             descriptiom='IPv6 CIDR block associated with the VPC')
-    # ipv6_cidr_block_association_association_id_N = fields.List(fields.String(example=''), required=False,
-    #                                                            allow_none=True, context='query',
-    #                                                            collection_format='multi',
-    #                                                            data_key='ipv6-cidr-block-association.'
-    #                                                                      'association-id.N',
-    #                                                            descriptiom='association ID for an IPv6 CIDR block '
-    #                                                                        'associated with the VPC')
-    # ipv6_cidr_block_association_state_N = fields.List(fields.String(example=''), required=False, allow_none=True,
-    #                                                   context='query', collection_format='multi',
-    #                                                   data_key='ipv6-cidr-block-association.state.N',
-    #                                                   descriptiom='state of an IPv6 CIDR block associated with '
-    #                                                               'the VPC.')
-    # isDefault_N = fields.List(fields.String(example=''), required=False, allow_none=True, context='query',
-    #                           collection_format='multi', data_key='isDefault.N',
-    #                           description='Indicates whether the VPC is the default VPC.')
     state_N = fields.List(
         fields.String(example="", validate=OneOf(["pending", "available"])),
         required=False,
@@ -222,7 +185,7 @@ class DescribeVpcsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="state.N",
-        descriptiom="state of the VPC (pending | available)",
+        metadata={"description": "state of the VPC (pending | available)"},
     )
     tag_value_N = fields.List(
         fields.String(example=""),
@@ -231,7 +194,7 @@ class DescribeVpcsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="tag-value.N",
-        description="value of a tag assigned to the resource",
+        metadata={"description": "value of a tag assigned to the resource"},
     )
     vpc_id_N = fields.List(
         fields.String(example=""),
@@ -240,7 +203,7 @@ class DescribeVpcsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="vpc-id.N",
-        description="ID of the VPC",
+        metadata={"description": "ID of the VPC"},
     )
     VpcId_N = fields.List(
         fields.String(example=""),
@@ -249,19 +212,17 @@ class DescribeVpcsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="VpcId.N",
-        description="One or more VPC IDs",
+        metadata={"description": "One or more VPC IDs"},
     )
     Nvl_MaxResults = fields.Integer(
         required=False,
-        default=10,
-        description="",
+        dump_default=10,
         data_key="Nvl-MaxResults",
         context="query",
     )
     Nvl_NextToken = fields.String(
         required=False,
-        default="0",
-        description="",
+        dump_default="0",
         data_key="Nvl-NextToken",
         context="query",
     )
@@ -328,34 +289,32 @@ class DescribeVpcs(ServiceApiView):
 
 
 class CreateVpcApiResponse1Schema(Schema):
-    groupId = fields.String(required=True, allow_none=False)
+    vpc = fields.Nested(VpcItemParameterResponseSchema, required=True, many=False, allow_none=False)
     requestId = fields.String(required=True, allow_none=True)
-
+    xmlns = fields.String(required=False, allow_none=True, data_key="__xmlns")
 
 class CreateVpcApiResponseSchema(Schema):
     CreateVpcResponse = fields.Nested(CreateVpcApiResponse1Schema, required=True, allow_none=False)
 
 
 class CreateVpcApiParamRequestSchema(Schema):
-    owner_id = fields.String(required=True, example="", description="account id", data_key="owner_id")
-    VpcName = fields.String(required=True, example="", description="name of the vpc")
-    VpcDescription = fields.String(required=False, example="", description="description of the vpc")
-    VpcType = fields.String(required=False, missing=None, description="vpc template")
+    owner_id = fields.String(required=True, data_key="owner_id", metadata={"description": "account id"})
+    VpcName = fields.String(required=True, metadata={"description": "name of the vpc"})
+    VpcDescription = fields.String(required=False, metadata={"description": "description of the vpc"})
+    VpcType = fields.String(required=False, load_default=None, metadata={"description": "vpc template"})
     CidrBlock = fields.String(
         required=False,
-        example="###.###.###.###/##",
-        missing=None,
+        load_default=None,
         validate=validate_network,
-        description="base vpc cidr block",
+        metadata={"example": "###.###.###.###/##", "description": "base vpc cidr block"},
     )
     InstanceTenancy = fields.String(
         required=False,
         allow_none=True,
-        example="default",
-        missing="default",
-        description="allowed tenancy of instances launched into the VPC. Use default for "
-        "shared vpc. Use dedicated for private vpc",
+        load_default="default",
         validate=OneOf(["default", "dedicated"]),
+        metadata={"example": "default", "description": "allowed tenancy of instances launched into the VPC. Use default for "
+        "shared vpc. Use dedicated for private vpc"},
     )
 
 
@@ -405,12 +364,12 @@ class CreateVpc(ServiceApiView):
         ok, desc = account.can_instantiate(service_definition)
         if not ok:
             raise ApiManagerError(
-                f" {desc}: account {account.name} cannot use definition {service_definition.bane}", code=400
+                f" {desc}: account {account.name} cannot use definition {service_definition.name}", code=400
             )
 
         # create service
         data["computeZone"] = parent_plugin.resource_uuid
-        inst = controller.add_service_type_plugin(
+        inst: ApiComputeVPC = controller.add_service_type_plugin(
             service_definition.oid,
             account_id,
             name=name,

@@ -1,12 +1,108 @@
 Changelog:
-  -
-    Version: 1.16.1
+  - version: 1.18.2
+    date: 2026-03-12
+    added:
+      - SG in LBAAS list
+    fixed:
+      - bugfix InternetGatewayBastion1ResponseSchema
+  - version: 1.18.1
+    date: 2026-02-12
+    added: 
+      - add missing license headers
+      - Update requirements
+    fixed:
+      - Bug fixing NSX firewall rules optimization
+
+  - version: 1.18.0
+    date: 2026-01-22
+    added:
+      - type hints
+      - lbaas as paas
+    awx job: add container info in error/success message
+    fixed:
+      - updated python version, labraries and dependencies
+      - schema definitions
+      - minor erros
+    removed:
+      - unused files
+      - six direct usage
+
+  - version: 1.17.13
+    date: 2025-12-11
+    added: []
+    fixed: []
+
+  - version: 1.17.12
+    date: 2025-11-27
+    added: []
+    fixed: []
+
+  - version: 1.17.11
+    date: 2025-11-06
+    added: []
+    fixed: []
+
+  - version: 1.17.10
+    date: 2025-10-09
+    fixed:
+      - fix swagger spec
+    added:
+      - DescribeSubnetById API endpoint
+      - Imported `GetApiObjectRequestSchema` from `beehive.common.apimanager` to handle object ID requests
+      - Implemented new `DescribeSubnetById` view to retrieve details of a single compute subnet by its ID via URL path parameter
+      - Added corresponding GET route `%s/describesubnet/<oid>` to `NetworkSubnetAPI` rules
+      - vpc ip availability
+
+  - version: 1.17.7
+    date: 2025-08-05
+    added:
+      - SecurityGroup rule apply to NSX security group not to NSX distribuited firewall
+    fixed:
+      - Add missing field in delete ingress and egress rules response schema
+      - Update create sg egress rule api
+      - Remove RuleLogging from create sg rule param request schema
+      - Remove some debug logs
+
+  - version: 1.17.4
+    date: 2025-04-17
+
+  - version: 1.17.3
+    date: 2025-03-28
+  - version: 1.17.2
+    date: 2025-03-12
+
+  - version: 1.17.1
+    date: 2025-03-6
+
+  - version: 1.17.0
+    date: 2025-02-24
+    desc: rilascio funzionalità
+    added:
+      - log to rule params
+      - default rule logging value to True
+    fixed:
+      - openapi schema definition
+    removed:
+      - some logs for debug only
+
+  - Version: 1.16.9
+    date: 2025-01-08
+    desc: rilascio correttive
+    added:
+    changed:
+    fixed:
+  - Version: 1.16.8
+    date: 2024-11-25
+    desc: rilascio correttive
+    added:
+    changed:
+    fixed:
+  - Version: 1.16.1
     date: 2024-06-04
     desc: rilascio correttive
-    Added:
+    added:
       - validation on network cidr while creating vpc and subnet
-  -
-    Version: 1.16.0
+  - Version: 1.16.0
     date: 2024-03-26
     desc:
     Fixed:
@@ -18,69 +114,60 @@ Changelog:
       - change status to error, upon activate, when destination not found
       - headers updated
       - changed manifest
-  -
-    Version: 1.15.3
+  - Version: 1.15.3
     date: 2024-03-11
     desc: rilascio correttive
     Fixed:
       - bastion orchestrator_select_types, type hint
       - gateway param orchestrator_select_types
       - fix delete service check service_type_plugin to avoid delete different type service
-  -
-    Version: 1.15.0
-    date:  2025-10-12
+  - Version: 1.15.0
+    date: 2025-10-12
     desc: rilascio funzionalità del prodotto
     Fixed:
       - minor fixes
-  -
-    Version: 1.14.0
+  - Version: 1.14.0
     date: 2023-06-22
     desc: rilascio funzionalità
-    Added:
+    added:
       - availability zone check in load balancer update
     Fixed:
       - minor fixes
       - some schemas in swagger descriptions
-  -
-    Version: 1.13.0
+  - Version: 1.13.0
     date: 2023-02-24
     desc: rilascio funzionalità
-    Added:
+    added:
       - load balancer draft management
       - ssh gateway management
       - improvements in run-state management
     Fixed:
       - minor fixes
-  -
-    Version: 1.12.0
+  - Version: 1.12.0
     date: 2023-01-27
     desc: rilascio funzionalità
     Fixed:
       - elastic lib updated
       - swagger updated  schemas declarations for security group, subnet and vpc
-  -
-    Version: 1.11.0
+  - Version: 1.11.0
     date: 2022-10-11
     desc: rilascio funzionalità
-  -
-    Version: 1.2.0
+  - Version: 1.2.0
     date: 2022-02-11
     desc: rilascio funzionalità
-    Added:
+    added:
       - base structure of ElasticIp [start]
     Fixed:
     Changed:
       - migrate Vpc, SecurityGroup and Subnet from ComputeService [start]
-  -
-    Version: 1.1.0
+  - Version: 1.1.0
     date: 2021-06-11
     desc: rilascio funzionalità
-    Added:
+    added:
       - add crud for bastion in ApiNetworkGateway
     Fixed:
     Changed:
       - add check in gateway delete
-  -
-    Version: 1.0.0
+  - Version: 1.0.0
     date: 2020-06-30
     desc: First production preview release.

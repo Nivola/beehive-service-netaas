@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: EUPL-1.2
 #
 # (C) Copyright 2020-2022 Regione Piemonte
-# (C) Copyright 2018-2024 CSI-Piemonte
+# (C) Copyright 2018-2026 CSI-Piemonte
 
 from flasgger import Schema
 from beecell.types.type_dict import dict_set
@@ -21,13 +21,14 @@ from beehive_service_netaas.networkservice.controller import (
 from marshmallow.validate import OneOf
 from marshmallow.decorators import validates_schema
 
+SwaggerTAG="outdated-networkservice"
 
 #
 # Health Monitor
 #
 class TagResponseSchema(Schema):
-    key = fields.String(required=True, example="test", description="The key of the tag")
-    value = fields.String(required=True, example="test", description="The value of the tag")
+    key = fields.String(required=True, metadata={"example": "test", "description": "The key of the tag"})
+    value = fields.String(required=True, metadata={"example": "test", "description": "The value of the tag"})
 
 
 class HealthMonitorResponseSchema(Schema):
@@ -36,94 +37,114 @@ class HealthMonitorResponseSchema(Schema):
         many=True,
         required=False,
         allow_none=True,
-        description="Any tags assigned to the target group",
+        metadata={"description": "Any tags assigned to the target group"},
     )
-    healthMonitorId = fields.String(required=True, example="12", description="ID of the health monitor")
+
+    healthMonitorId = fields.String(
+        required=True,
+        metadata={"example": "12", "description": "ID of the health monitor"},
+    )
+
     ownerId = fields.String(
         required=True,
-        example="",
-        descriptiom="ID of the account that owns the health monitor",
+        metadata={"description": "ID of the account that owns the health monitor"},
     )
+
     nvl_ownerAlias = fields.String(
         required=False,
-        example="test",
         data_key="nvl-ownerAlias",
-        descriptiom="Alias of the account that owns the health monitor",
+        metadata={"example": "test", "description": "Alias of the account that owns the health monitor"},
     )
-    name = fields.String(required=True, description="The name of the health monitor")
+
+    name = fields.String(required=True, metadata={"description": "The name of the health monitor"})
+
     state = fields.String(
         required=True,
-        example="available",
-        description="State of the service instance (pending | " "available | transient | error)",
+        metadata={"example": "available", "description": "State of the service instance (pending | " "available | transient | error)"},
     )
+
     protocol = fields.String(
         required=True,
-        description="The protocol the load balancer uses when performing " "health checks on targets",
+        metadata={"description": "The protocol the load balancer uses when performing " "health checks on targets"},
     )
+
     interval = fields.Integer(
         required=True,
-        description="The approximate amount of time, in seconds, between health " "checks of an individual target",
         allow_none=True,
+        metadata={"description": "The approximate amount of time, in seconds, between health " "checks of an individual target"},
     )
+
     timeout = fields.Integer(
         required=True,
-        description="The amount of time, in seconds, during which no response "
-        "from a target means a failed health check",
         allow_none=True,
+        metadata={"description": "The amount of time, in seconds, during which no response "
+        "from a target means a failed health check"},
     )
+
     maxRetries = fields.Integer(
         required=True,
-        description="The number of consecutive health check failures "
-        "required before considering a target unhealthy.",
         allow_none=True,
+        metadata={
+            "description": (
+                "The number of consecutive health check failures "
+                "required before considering a target unhealthy."
+            )
+        },
     )
+
     method = fields.String(
         required=True,
-        description="The HTTP method to be used for health check",
         allow_none=True,
+        metadata={"description": "The HTTP method to be used for health check"},
     )
+
     requestURI = fields.String(
         required=True,
-        description="The destination for health checks on the targets.",
         allow_none=True,
+        metadata={"description": "The destination for health checks on the targets."},
     )
+
     expected = fields.String(
         required=True,
-        description="The HTTP code the monitor expects to match in a " "successful response from a target",
         allow_none=True,
+        metadata={"description": "The HTTP code the monitor expects to match in a successful response from a target"},
     )
+
     predefined = fields.Boolean(
         required=True,
         allow_none=False,
-        description="Specify whether health monitor is predefined or custom, i.e. defined by the user",
+        metadata={"description": "Specify whether health monitor is predefined or custom, i.e. defined by the user"},
     )
+
     ext_name = fields.Dict(
         required=False,
         allow_none=True,
-        description="The name of the physical health monitor, for predefined health monitor only",
+        metadata={"description": "The name of the physical health monitor, for predefined health monitor only"},
     )
 
 
 class DescribeHealthMonitorResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, allow_none=False, description="Request ID")
+    requestId = fields.String(required=True, allow_none=False, metadata={"description": "Request ID"})
+
     healthMonitorSet = fields.Nested(
         HealthMonitorResponseSchema,
         many=True,
         required=True,
         allow_none=False,
-        description="List of health monitor definitions",
+        metadata={"description": "List of health monitor definitions"},
     )
+
     healthMonitorTotal = fields.Integer(
         required=True,
-        example="",
-        description="Total number of health monitors",
         data_key="healthMonitorTotal",
+        metadata={"description": "Total number of health monitors"},
     )
+
     nextToken = fields.String(
         required=True,
         allow_none=True,
-        description="The token to use to retrieve the next page " "of results. This value is null",
+        metadata={"description": "The token to use to retrieve the next page " "of results. This value is null"},
     )
 
 
@@ -144,13 +165,15 @@ class DescribeHealthMonitorsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="owner-id.N",
-        description="Account ID of the health monitor owner",
+        metadata={"description": "Account ID of the health monitor owner"},
     )
+
     HealthMonitorName = fields.String(
         required=False,
         context="query",
-        description="The user-supplied health monitor name",
+        metadata={"description": "The user-supplied health monitor name"},
     )
+
     HealthMonitorId_N = fields.List(
         fields.String(),
         required=False,
@@ -158,31 +181,34 @@ class DescribeHealthMonitorsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="HealthMonitorId.N",
-        description="One or more health monitor IDs",
+        metadata={"description": "One or more health monitor IDs"},
     )
+
     MaxResults = fields.Integer(
         required=False,
-        default=10,
-        description="Number of results per page",
+        dump_default=10,
         data_key="MaxResults",
         context="query",
+        metadata={"description": "Number of results per page"},
     )
+
     NextToken = fields.String(
         required=False,
-        default="0",
-        description="Page number",
+        dump_default="0",
         data_key="Nvl-NextToken",
         context="query",
+        metadata={"description": "Page number"},
     )
 
 
 class DescribeHealthMonitors(ServiceApiView):
     summary = "Describe health monitor"
     description = "Describe health monitor"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {"DescribeHealthMonitorsResponseSchema": DescribeHealthMonitorsResponseSchema}
     parameters = SwaggerHelper().get_parameters(DescribeHealthMonitorsRequestSchema)
     parameters_schema = DescribeHealthMonitorsRequestSchema
+
     responses = ServiceApiView.setResponses(
         {
             200: {
@@ -191,6 +217,7 @@ class DescribeHealthMonitors(ServiceApiView):
             }
         }
     )
+
     response_schema = DescribeHealthMonitorsResponseSchema
 
     def get(self, controller, data, *args, **kwargs):
@@ -240,13 +267,13 @@ class DescribeHealthMonitors(ServiceApiView):
 
 
 class CreateHealthMonitorResponse2Schema(Schema):
-    healthMonitorId = fields.String(required=True, allow_none=False, description="The ID of the monitor")
+    healthMonitorId = fields.String(required=True, allow_none=False, metadata={"description": "The ID of the monitor"})
 
 
 class CreateHealthMonitorResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
     HealthMonitor = fields.Nested(CreateHealthMonitorResponse2Schema, required=True, allow_none=False)
-    requestId = fields.String(required=True, allow_none=True, description="Request ID")
+    requestId = fields.String(required=True, allow_none=True, metadata={"description": "Request ID"})
 
 
 class CreateHealthMonitorResponseSchema(Schema):
@@ -256,49 +283,57 @@ class CreateHealthMonitorResponseSchema(Schema):
 class CreateHealthMonitorParamsRequestSchema(Schema):
     owner_id = fields.String(
         required=True,
-        example="account-1",
-        description="The account ID",
         data_key="owner-id",
+        metadata={"example": "account-1", "description": "The account ID"},
     )
-    Name = fields.String(required=True, allow_none=False, description="The name of the health monitor")
+
+    Name = fields.String(required=True, allow_none=False, metadata={"description": "The name of the health monitor"})
+
     Protocol = fields.String(
         required=True,
         allow_none=False,
         validate=OneOf(["HTTP", "HTTPS", "TCP"]),
-        description="The protocol the load balancer uses when performing health checks on " "targets",
+        metadata={"description": "The protocol the load balancer uses when performing health checks on " "targets"},
     )
+
     Interval = fields.Integer(
         required=False,
         allow_none=True,
-        description="The approximate amount of time, in " "seconds, between health checks of an individual target",
+        metadata={"description": "The approximate amount of time, in " "seconds, between health checks of an individual target"},
     )
+
     Timeout = fields.Integer(
         required=False,
         allow_none=True,
-        description="The amount of time, in seconds, during "
-        "which no response from a target means a failed health check",
+        metadata={"description": "The amount of time, in seconds, during "
+        "which no response from a target means a failed health check"},
     )
+
     MaxRetries = fields.Integer(
         required=False,
         allow_none=True,
-        description="The number of consecutive health check " "failures required before considering a target unhealthy",
+        metadata={"description": "The number of consecutive health check " "failures required before considering a target unhealthy"},
     )
+
     Method = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["GET", "POST", "OPTIONS"]),
-        description="The HTTP method to be used for health check",
+        metadata={"description": "The HTTP method to be used for health check"},
     )
+
     RequestURI = fields.String(
         required=False,
         allow_none=True,
-        description="The destination for health checks on the targets",
+        metadata={"description": "The destination for health checks on the targets"},
     )
+
     Expected = fields.String(
         required=False,
         allow_none=True,
-        description="The HTTP code the monitor expects to match " "in a successful response from target",
+        metadata={"description": "The HTTP code the monitor expects to match " "in a successful response from target"},
     )
+
     MonitorTemplate = NotEmptyString(required=False, allow_none=True, description="Health monitor template")
 
 
@@ -313,11 +348,13 @@ class CreateHealthMonitorBodyRequestSchema(Schema):
 class CreateHealthMonitor(ServiceApiView):
     summary = "Create health monitor"
     description = "Create health monitor"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
+
     definitions = {
         "CreateHealthMonitorRequestSchema": CreateHealthMonitorRequestSchema,
         "CreateHealthMonitorResponseSchema": CreateHealthMonitorResponseSchema,
     }
+
     parameters = SwaggerHelper().get_parameters(CreateHealthMonitorBodyRequestSchema)
     parameters_schema = CreateHealthMonitorRequestSchema
     responses = SwaggerApiView.setResponses(
@@ -366,8 +403,8 @@ class CreateHealthMonitor(ServiceApiView):
 
 class ModifyHealthMonitorResponseItemSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, description="The ID of the request")
-    healthMonitorId = fields.String(required=True, description="The ID of the service")
+    requestId = fields.String(required=True, metadata={"description": "The ID of the request"})
+    healthMonitorId = fields.String(required=True, metadata={"description": "The ID of the service"})
 
 
 class ModifyHealthMonitorResponseSchema(Schema):
@@ -383,46 +420,57 @@ class ModifyHealthMonitorRequest1Schema(Schema):
     healthMonitorId = fields.String(
         required=True,
         allow_none=False,
-        example="monitor-896478",
-        description="The ID of the monitor",
+        metadata={"example": "monitor-896478", "description": "The ID of the monitor"},
     )
+
     Protocol = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["HTTP", "HTTPS", "TCP"]),
-        description="The protocol the load balancer uses when performing health checks on targets",
+        metadata={"description": "The protocol the load balancer uses when performing health checks on targets"},
     )
+
     Interval = fields.Integer(
         required=False,
         allow_none=True,
-        description="The approximate amount of time, in " "seconds, between health checks of an individual target",
+        metadata={
+            "description":
+                "The approximate amount of time, in seconds, between health checks of an individual target"},
     )
+
     Timeout = fields.Integer(
         required=False,
         allow_none=True,
-        description="The amount of time, in seconds, during "
-        "which no response from a target means a failed health check",
+        metadata={"description": "The amount of time, in seconds, during "
+        "which no response from a target means a failed health check"},
     )
+
     MaxRetries = fields.Integer(
         required=False,
         allow_none=True,
-        description="The number of consecutive health check " "failures required before considering a target unhealthy",
+        metadata={
+            "description":
+                "The number of consecutive health check failures required before considering a target unhealthy"
+        },
     )
+
     Method = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["GET", "POST", "OPTIONS"]),
-        description="The HTTP method to be used for health check",
+        metadata={"description": "The HTTP method to be used for health check"},
     )
+
     RequestURI = fields.String(
         required=False,
         allow_none=True,
-        description="The destination for health checks on the targets",
+        metadata={"description": "The destination for health checks on the targets"},
     )
+
     Expected = fields.String(
         required=False,
         allow_none=True,
-        description="The HTTP code the monitor expects to match " "in a successful response from target",
+        metadata={"description": "The HTTP code the monitor expects to match " "in a successful response from target"},
     )
 
 
@@ -437,11 +485,13 @@ class ModifyHealthMonitorBodyRequestSchema(Schema):
 class ModifyHealthMonitor(ServiceApiView):
     summary = "Modify health monitor"
     description = "Modify health monitor"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
+
     definitions = {
         "ModifyHealthMonitorRequestSchema": ModifyHealthMonitorRequestSchema,
         "ModifyHealthMonitorResponseSchema": ModifyHealthMonitorResponseSchema,
     }
+
     parameters = SwaggerHelper().get_parameters(ModifyHealthMonitorBodyRequestSchema)
     parameters_schema = ModifyHealthMonitorRequestSchema
     responses = SwaggerApiView.setResponses(
@@ -467,8 +517,8 @@ class ModifyHealthMonitor(ServiceApiView):
 
 class DeleteHealthMonitorResponseItemSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, description="The ID of the request")
-    nvl_return = fields.Boolean(required=True, example=True, data_key="return")
+    requestId = fields.String(required=True, metadata={"description": "The ID of the request"})
+    nvl_return = fields.Boolean(required=True, data_key="return", metadata={"example": True})
 
 
 class DeleteHealthMonitorResponseSchema(Schema):
@@ -484,8 +534,7 @@ class DeleteHealthMonitorRequestSchema(Schema):
     healthMonitorId = fields.String(
         required=True,
         context="query",
-        example="monitor-896478",
-        description="The ID of the monitor",
+        metadata={"example": "monitor-896478", "description": "The ID of the monitor"},
     )
 
 
@@ -496,7 +545,7 @@ class DeleteHealthMonitorBodyRequestSchema(Schema):
 class DeleteHealthMonitor(ServiceApiView):
     summary = "Delete health monitor"
     description = "Delete health monitor"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "DeleteHealthMonitorRequestSchema": DeleteHealthMonitorRequestSchema,
         "DeleteHealthMonitorResponseSchema": DeleteHealthMonitorResponseSchema,
@@ -528,19 +577,19 @@ class DeleteHealthMonitor(ServiceApiView):
 # Target Group
 #
 class TargetGroupAttachedHealthMonitorResponseSchema(Schema):
-    id = fields.String(required=True, description="Health monitor ID", data_key="healthMonitorId")
-    name = fields.String(required=True, description="Health monitor name")
-    state = fields.String(required=True, description="Health monitor state")
+    id = fields.String(required=True, data_key="healthMonitorId", metadata={"description": "Health monitor ID"})
+    name = fields.String(required=True, metadata={"description": "Health monitor name"})
+    state = fields.String(required=True, metadata={"description": "Health monitor state"})
 
 
 class TargetGroupAttachedTargets1ResponseSchema(Schema):
-    id = fields.String(required=True, description="Target ID")
-    name = fields.String(required=True, description="Target name")
-    state = fields.String(required=True, description="Target state")
-    lb_port = fields.Integer(required=True, description="Target port for balanced traffic")
-    hm_port = fields.Integer(required=True, description="Target port for health checks")
-    site = fields.String(required=True, description="Target site")
-    resource_uuid = fields.String(required=True, description="Target resource uuid")
+    id = fields.String(required=True, metadata={"description": "Target ID"})
+    name = fields.String(required=True, metadata={"description": "Target name"})
+    state = fields.String(required=True, metadata={"description": "Target state"})
+    lb_port = fields.Integer(required=True, metadata={"description": "Target port for balanced traffic"})
+    hm_port = fields.Integer(required=True, metadata={"description": "Target port for health checks"})
+    site = fields.String(required=True, metadata={"description": "Target site"})
+    resource_uuid = fields.String(required=True, metadata={"description": "Target resource uuid"})
 
 
 class TargetGroupAttachedTargetsResponseSchema(Schema):
@@ -548,67 +597,71 @@ class TargetGroupAttachedTargetsResponseSchema(Schema):
         TargetGroupAttachedTargets1ResponseSchema,
         required=True,
         many=True,
-        description="List of registered targets",
+        metadata={"description": "List of registered targets"},
     )
-    totalTargets = fields.Integer(required=True, description="The amount of registered targets")
+    totalTargets = fields.Integer(required=True, metadata={"description": "The amount of registered targets"})
 
 
 class TargetGroupAttachmentSetResponseSchema(Schema):
     TargetSet = fields.Nested(
         TargetGroupAttachedTargetsResponseSchema,
         required=True,
-        description="Attached targets",
+        metadata={"description": "Attached targets"},
     )
     HealthMonitor = fields.Nested(
         TargetGroupAttachedHealthMonitorResponseSchema,
         required=True,
         allow_none=True,
-        description="Attached health monitor",
+        metadata={"description": "Attached health monitor"},
     )
 
 
 class TargetGroupResponseSchema(Schema):
     tagSet = fields.Nested(TagResponseSchema, many=True, required=False, allow_none=True)
-    name = fields.String(required=True, description="The name of the health monitor")
-    balancingAlgorithm = fields.String(required=True, description="The algorithm used to load balance targets")
+    name = fields.String(required=True, metadata={"description": "The name of the health monitor"})
+    balancingAlgorithm = fields.String(
+        required=True,
+        metadata={"description": "The algorithm used to load balance targets"},
+    )
     targetType = fields.String(
         required=True,
-        description="The type of target to specify when registering targets " "with the target group, e.g. vm",
+        metadata={"description": "The type of target to specify when registering targets " "with the target group, e.g. vm"},
     )
     attachmentSet = fields.Nested(
         TargetGroupAttachmentSetResponseSchema,
         required=True,
-        description="Any targets and/or health monitor attached to the target group",
+        metadata={"description": "Any targets and/or health monitor attached to the target group"},
     )
 
 
 class DescribeTargetGroupsResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, allow_none=False, description="Request ID")
+    requestId = fields.String(required=True, allow_none=False, metadata={"description": "Request ID"})
     targetGroupSet = fields.Nested(
         TargetGroupResponseSchema,
         many=True,
         required=True,
         allow_none=False,
-        description="List of target group definitions",
+        metadata={"description": "List of target group definitions"},
     )
     targetGroupTotal = fields.Integer(
         required=True,
-        example="",
-        description="Total number of target groups",
         data_key="targetGroupTotal",
+        metadata={"description": "Total number of target groups"},
     )
     nextToken = fields.String(
         required=True,
-        example="ednundw83ldw",
         allow_none=True,
-        description="The token to use to retrieve the next page of results. This value is null",
+        metadata={"example": "ednundw83ldw", "description": "The token to use to retrieve the next page of results. This value is null"},
     )
 
 
 class DescribeTargetGroupsResponseSchema(Schema):
     DescribeTargetGroupsResponse = fields.Nested(
-        DescribeTargetGroupsResponse1Schema, required=True, many=False, allow_none=False
+        DescribeTargetGroupsResponse1Schema,
+        required=True,
+        many=False,
+        allow_none=False,
     )
 
 
@@ -620,12 +673,12 @@ class DescribeTargetGroupsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="owner-id.N",
-        description="Account ID of the target group owner",
+        metadata={"description": "Account ID of the target group owner"},
     )
     TargetGroupName = fields.String(
         required=False,
         context="query",
-        description="The user-supplied target group name",
+        metadata={"description": "The user-supplied target group name"},
     )
     TargetGroupId_N = fields.List(
         fields.String(),
@@ -634,28 +687,28 @@ class DescribeTargetGroupsRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="TargetGroupId.N",
-        description="The names of the target groups",
+        metadata={"description": "The names of the target groups"},
     )
     MaxResults = fields.Integer(
         required=False,
-        default=10,
-        description="Number of results per page",
+        dump_default=10,
         data_key="MaxResults",
         context="query",
+        metadata={"description": "Number of results per page"},
     )
     NextToken = fields.String(
         required=False,
-        default="0",
-        description="Page number",
+        dump_default="0",
         data_key="Nvl-NextToken",
         context="query",
+        metadata={"description": "Page number"},
     )
 
 
 class DescribeTargetGroups(ServiceApiView):
     summary = "Describe target groups"
     description = "Describe target groups"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {"DescribeTargetGroupsResponseSchema": DescribeTargetGroupsResponseSchema}
     parameters = SwaggerHelper().get_parameters(DescribeTargetGroupsRequestSchema)
     parameters_schema = DescribeTargetGroupsRequestSchema
@@ -711,7 +764,11 @@ class DescribeTargetGroups(ServiceApiView):
 
 
 class CreateTargetGroupResponse2Schema(Schema):
-    targetGroupId = fields.String(required=True, allow_none=False, description="The ID of the target group")
+    targetGroupId = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The ID of the target group"},
+    )
     # attachmentSet = fields.Nested(TargetGroupsAttachmentSetResponseSchema, required=True, description='Any targets '
     #                               'and/or health monitor attached to the target group')
     # tagSet = fields.Nested(TagResponseSchema, many=True, required=False, allow_none=True, description='Any tags '
@@ -721,7 +778,7 @@ class CreateTargetGroupResponse2Schema(Schema):
 class CreateTargetGroupResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
     TargetGroup = fields.Nested(CreateTargetGroupResponse2Schema, required=True, allow_none=False)
-    requestId = fields.String(required=True, allow_none=True, description="Request ID")
+    requestId = fields.String(required=True, allow_none=True, metadata={"description": "Request ID"})
 
 
 class CreateTargetGroupResponseSchema(Schema):
@@ -731,38 +788,37 @@ class CreateTargetGroupResponseSchema(Schema):
 class CreateTargetGroupParamsRequestSchema(Schema):
     owner_id = fields.String(
         required=True,
-        example="account-1",
-        description="The account ID",
         data_key="owner-id",
+        metadata={"example": "account-1", "description": "The account ID"},
     )
-    Name = fields.String(required=True, allow_none=False, description="The name of the target group")
+    Name = fields.String(required=True, allow_none=False, metadata={"description": "The name of the target group"})
     Description = fields.String(
         required=False,
         allow_none=True,
-        description="A description for the target group",
+        metadata={"description": "A description for the target group"},
     )
     BalancingAlgorithm = fields.String(
         required=True,
         allow_none=False,
         validate=OneOf(["round-robin", "ip-hash", "leastconn", "uri"]),
-        description="The algorithm used to load balance targets",
+        metadata={"description": "The algorithm used to load balance targets"},
     )
     TargetType = fields.String(
         required=True,
         allow_none=False,
         validate=OneOf(["vm", "container"]),
-        description="The type of target you must specify when registering targets to this target group",
+        metadata={"description": "The type of target you must specify when registering targets to this target group"},
     )
     HealthMonitor = fields.String(
         required=False,
         allow_none=True,
-        description="The monitor used to perform health checks on targets",
+        metadata={"description": "The monitor used to perform health checks on targets"},
     )
     Transparent = fields.Boolean(
         required=False,
         allow_none=True,
         validate=OneOf([True, False]),
-        description="whether client IP addresses are visible to the backend servers",
+        metadata={"description": "whether client IP addresses are visible to the backend servers"},
     )
 
 
@@ -777,7 +833,7 @@ class CreateTargetGroupBodyRequestSchema(Schema):
 class CreateTargetGroup(ServiceApiView):
     summary = "Create target group"
     description = "Create target group"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "CreateTargetGroupRequestSchema": CreateTargetGroupRequestSchema,
         "CreateTargetGroupResponseSchema": CreateTargetGroupResponseSchema,
@@ -826,34 +882,41 @@ class CreateTargetGroup(ServiceApiView):
 
 class ModifyTargetGroupResponseItemSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, description="The ID of the request")
-    targetGroupId = fields.String(required=True, description="The ID of the service")
+    requestId = fields.String(required=True, metadata={"description": "The ID of the request"})
+    targetGroupId = fields.String(required=True, metadata={"description": "The ID of the service"})
 
 
 class ModifyTargetGroupResponseSchema(Schema):
     ModifyTargetGroupResponse = fields.Nested(
-        ModifyTargetGroupResponseItemSchema, required=True, many=False, allow_none=False
+        ModifyTargetGroupResponseItemSchema,
+        required=True,
+        many=False,
+        allow_none=False,
     )
 
 
 class ModifyTargetGroupRequest1Schema(Schema):
-    targetGroupId = fields.String(required=True, allow_none=False, description="The ID of the target group")
+    targetGroupId = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The ID of the target group"},
+    )
     Description = fields.String(
         required=False,
         allow_none=True,
-        description="A description for the target group",
+        metadata={"description": "A description for the target group"},
     )
     BalancingAlgorithm = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["round-robin", "ip-hash", "leastconn", "uri"]),
-        description="The algorithm used to load balance targets",
+        metadata={"description": "The algorithm used to load balance targets"},
     )
     Transparent = fields.Boolean(
         required=False,
         allow_none=True,
         validate=OneOf([True, False]),
-        description="whether client IP addresses are visible to the backend servers",
+        metadata={"description": "whether client IP addresses are visible to the backend servers"},
     )
 
 
@@ -868,7 +931,7 @@ class ModifyTargetGroupBodyRequestSchema(Schema):
 class ModifyTargetGroup(ServiceApiView):
     summary = "Modify target group"
     description = "Modify target group"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "ModifyTargetGroupRequestSchema": ModifyTargetGroupRequestSchema,
         "ModifyTargetGroupResponseSchema": ModifyTargetGroupResponseSchema,
@@ -898,8 +961,8 @@ class ModifyTargetGroup(ServiceApiView):
 
 class DeleteTargetGroupResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, description="The ID of the request")
-    nvl_return = fields.Boolean(required=True, example=True, data_key="return")
+    requestId = fields.String(required=True, metadata={"description": "The ID of the request"})
+    nvl_return = fields.Boolean(required=True, data_key="return", metadata={"example": True})
 
 
 class DeleteTargetGroupResponseSchema(Schema):
@@ -910,8 +973,7 @@ class DeleteTargetGroupRequestSchema(Schema):
     targetGroupId = fields.String(
         required=True,
         context="query",
-        example="target-group-896478",
-        description="The ID of the target group",
+        metadata={"example": "target-group-896478", "description": "The ID of the target group"},
     )
 
 
@@ -922,7 +984,7 @@ class DeleteTargetGroupBodyRequestSchema(Schema):
 class DeleteTargetGroup(ServiceApiView):
     summary = "Delete target group"
     description = "Delete target group"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "DeleteTargetGroupRequestSchema": DeleteTargetGroupRequestSchema,
         "DeleteTargetGroupResponseSchema": DeleteTargetGroupResponseSchema,
@@ -952,18 +1014,17 @@ class DeleteTargetGroup(ServiceApiView):
 
 class RegisterTargets1ResponseSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, example="erc453", description="Request ID")
+    requestId = fields.String(required=True, metadata={"example": "erc453", "description": "Request ID"})
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="Is true if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "Is true if the request succeeds, and an error otherwise"},
     )
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="Active task ID",
+        metadata={"description": "Active task ID"},
     )
 
 
@@ -972,27 +1033,27 @@ class RegisterTargetsResponseSchema(Schema):
 
 
 class RegisterTargets2RequestSchema(Schema):
-    Id = fields.String(required=True, description="The ID of the target")
+    Id = fields.String(required=True, metadata={"description": "The ID of the target"})
     LbPort = fields.Integer(
         required=True,
         allow_none=False,
-        description="The port on which target receives traffic",
+        metadata={"description": "The port on which target receives traffic"},
     )
     HmPort = fields.Integer(
         required=False,
         allow_none=True,
-        description="The port on which target is listening for health check",
+        metadata={"description": "The port on which target is listening for health check"},
     )
 
 
 class RegisterTargets1RequestSchema(Schema):
-    TargetGroupId = fields.String(required=True, description="The ID of the target group")
+    TargetGroupId = fields.String(required=True, metadata={"description": "The ID of the target group"})
     Targets = fields.Nested(
         RegisterTargets2RequestSchema,
         required=True,
         allow_none=False,
         many=True,
-        description="List of targets",
+        metadata={"description": "List of targets"},
     )
 
 
@@ -1007,7 +1068,7 @@ class RegisterTargetsBodyRequestSchema(Schema):
 class RegisterTargets(ServiceApiView):
     summary = "Register targets on target group"
     description = "Register targets on target group"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "RegisterTargetsRequestSchema": RegisterTargetsRequestSchema,
         "RegisterTargetsResponseSchema": RegisterTargetsResponseSchema,
@@ -1038,39 +1099,41 @@ class RegisterTargets(ServiceApiView):
 
 class DeregisterTargets1ResponseSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, example="erc453", description="Request ID")
+    requestId = fields.String(required=True, metadata={"example": "erc453", "description": "Request ID"})
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="Is true if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "Is true if the request succeeds, and an error otherwise"},
     )
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="Active task ID",
+        metadata={"description": "Active task ID"},
     )
 
 
 class DeregisterTargetsResponseSchema(Schema):
     DeregisterTargetsResponse = fields.Nested(
-        DeregisterTargets1ResponseSchema, required=True, many=False, allow_none=False
+        DeregisterTargets1ResponseSchema,
+        required=True,
+        many=False,
+        allow_none=False,
     )
 
 
 class DeregisterTargets2RequestSchema(Schema):
-    Id = fields.String(required=True, description="The ID of the target")
+    Id = fields.String(required=True, metadata={"description": "The ID of the target"})
 
 
 class DeregisterTargets1RequestSchema(Schema):
-    TargetGroupId = fields.String(required=True, description="The ID of the target group")
+    TargetGroupId = fields.String(required=True, metadata={"description": "The ID of the target group"})
     Targets = fields.Nested(
         DeregisterTargets2RequestSchema,
         required=True,
         allow_none=False,
         many=True,
-        description="List of targets",
+        metadata={"description": "List of targets"},
     )
 
 
@@ -1085,7 +1148,7 @@ class DeregisterTargetsBodyRequestSchema(Schema):
 class DeregisterTargets(ServiceApiView):
     summary = "Deregister target from target group"
     description = "Deregister target from target group"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "DeregisterTargetsRequestSchema": DeregisterTargetsRequestSchema,
         "DeregisterTargetsResponseSchema": DeregisterTargetsResponseSchema,
@@ -1118,18 +1181,17 @@ class DeregisterTargets(ServiceApiView):
 
 class RegisterHealthMonitor1ResponseSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, example="erc453", description="Request ID")
+    requestId = fields.String(required=True, metadata={"example": "erc453", "description": "Request ID"})
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="Is true if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "Is true if the request succeeds, and an error otherwise"},
     )
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="Active task ID",
+        metadata={"description": "Active task ID"},
     )
 
 
@@ -1143,8 +1205,16 @@ class RegisterHealthMonitorResponseSchema(Schema):
 
 
 class RegisterHealthMonitor1RequestSchema(Schema):
-    TargetGroupId = fields.String(required=True, allow_none=False, description="The ID of the target group")
-    HealthMonitorId = fields.String(required=True, allow_none=False, description="The ID of the health monitor")
+    TargetGroupId = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The ID of the target group"},
+    )
+    HealthMonitorId = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The ID of the health monitor"},
+    )
 
 
 class RegisterHealthMonitorRequestSchema(Schema):
@@ -1158,7 +1228,7 @@ class RegisterHealthMonitorBodyRequestSchema(Schema):
 class RegisterHealthMonitor(ServiceApiView):
     summary = "Register health monitor on target group"
     description = "Register health monitor on target group"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "RegisterHealthMonitorRequestSchema": RegisterHealthMonitorRequestSchema,
         "RegisterHealthMonitorResponseSchema": RegisterHealthMonitorResponseSchema,
@@ -1191,18 +1261,17 @@ class RegisterHealthMonitor(ServiceApiView):
 
 class DeregisterHealthMonitor1ResponseSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, example="erc453", description="Request ID")
+    requestId = fields.String(required=True, metadata={"example": "erc453", "description": "Request ID"})
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="Is true if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "Is true if the request succeeds, and an error otherwise"},
     )
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="Active task ID",
+        metadata={"description": "Active task ID"},
     )
 
 
@@ -1216,7 +1285,7 @@ class DeregisterHealthMonitorResponseSchema(Schema):
 
 
 class DeregisterHealthMonitor1RequestSchema(Schema):
-    TargetGroupId = fields.String(required=True, description="The ID of the target group")
+    TargetGroupId = fields.String(required=True, metadata={"description": "The ID of the target group"})
 
 
 class DeregisterHealthMonitorRequestSchema(Schema):
@@ -1230,7 +1299,7 @@ class DeregisterHealthMonitorBodyRequestSchema(Schema):
 class DeregisterHealthMonitor(ServiceApiView):
     summary = "Deregister health monitor from target group"
     description = "Deregister health monitor from target group"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "DeregisterHealthMonitorRequestSchema": DeregisterHealthMonitorRequestSchema,
         "DeregisterHealthMonitorResponseSchema": DeregisterHealthMonitorResponseSchema,
@@ -1269,116 +1338,125 @@ class DeregisterHealthMonitor(ServiceApiView):
 # Listener
 #
 class GatewayApiTagResponseSchema(Schema):
-    key = fields.String(required=True, example="test", description="The key of the tag")
-    value = fields.String(required=True, example="test", description="The value of the tag")
+    key = fields.String(required=True, metadata={"example": "test", "description": "The key of the tag"})
+    value = fields.String(required=True, metadata={"example": "test", "description": "The value of the tag"})
 
 
 class ListenerResponseSslSchema(Schema):
-    certificate = fields.String(required=False, allow_none=True, description="Certificate ID")
-    cipher = fields.String(required=False, allow_none=True, description="Cipher suite")
+    certificate = fields.String(required=False, allow_none=True, metadata={"description": "Certificate ID"})
+    cipher = fields.String(required=False, allow_none=True, metadata={"description": "Cipher suite"})
 
 
 class ListenerPersistenceResponseSchema(Schema):
     method = fields.String(
         required=False,
         allow_none=True,
-        description="Persistence criteria used by load balancer",
+        metadata={"description": "Persistence criteria used by load balancer"},
     )
     cookie_name = fields.String(
         required=False,
         allow_none=True,
-        description="The name of the cookie when cookie-based " "persistence is adopted",
         data_key="cookieName",
+        metadata={"description": "The name of the cookie when cookie-based " "persistence is adopted"},
     )
     cookie_mode = fields.String(
         required=False,
         allow_none=True,
-        description="The way the load balancer manages cookie-based persistence",
         data_key="cookieMode",
+        metadata={"description": "The way the load balancer manages cookie-based persistence"},
     )
     expiration_time = fields.Integer(
         required=False,
         allow_none=True,
-        description="Persistence expiration time",
         data_key="expirationTime",
+        metadata={"description": "Persistence expiration time"},
     )
 
 
 class ListenerResponseSchema(Schema):
     tagSet = fields.Nested(TagResponseSchema, many=True, required=False, allow_none=True)
-    listenerId = fields.String(required=True, example="12", description="Listener ID")
+    listenerId = fields.String(required=True, metadata={"example": "12", "description": "Listener ID"})
     ownerId = fields.String(
         required=True,
-        example="",
-        descriptiom="ID of the account that owns the listener",
+        metadata={"example": "test", "description": "ID of the account that owns the listener"},
     )
+
     nvl_ownerAlias = fields.String(
         required=False,
-        example="test",
         data_key="nvl-ownerAlias",
-        descriptiom="Alias of the account that owns the listener",
+        metadata={"example": "test", "description": "Alias of the account that owns the listener"},
     )
-    name = fields.String(required=True, description="The name of the listener")
+
+    name = fields.String(required=True, metadata={"description": "The name of the listener"})
+
     state = fields.String(
         required=True,
-        example="available",
-        description="State of the service instance (pending | " "available | transient | error)",
+        metadata={"example": "available", "description": "State of the service instance (pending | " "available | transient | error)"},
     )
+
     trafficType = fields.String(
         required=True,
         allow_none=False,
-        desctiption="The way the load balancer processes " "the traffic directed to destination servers",
+        metadata={"description": "The way the load balancer processes " "the traffic directed to destination servers"},
     )
+
     persistence = fields.Nested(
         ListenerPersistenceResponseSchema,
         required=False,
         allow_none=True,
-        description="Set of parameters describing how load balancer handles the persistence",
+        metadata={"description": "Set of parameters describing how load balancer handles the persistence"},
     )
+
     clientSSL = fields.Nested(
         ListenerResponseSslSchema,
         required=False,
         allow_none=True,
-        description="Set of SSL configuration for the client",
+        metadata={"description": "Set of SSL configuration for the client"},
     )
+
     serverSSL = fields.Nested(
         ListenerResponseSslSchema,
         required=False,
         allow_none=True,
-        description="Set of SSL configuration for the server",
+        metadata={"description": "Set of SSL configuration for the server"},
     )
+
     insertXForwardedFor = fields.Boolean(
         required=False,
         allow_none=True,
-        description="Flag to instruct load " "balancer whether X-Forwarded-For header must be appended in the request",
+        metadata={"description": "Flag to instruct load " "balancer whether X-Forwarded-For header must be appended in the request"},
     )
+
     urlRedirect = fields.String(
         required=False,
         allow_none=True,
-        description="The URL to redirect client requests",
+        metadata={"description": "The URL to redirect client requests"},
     )
 
 
 class DescribeListenerResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, allow_none=False, description="Request ID")
+    requestId = fields.String(required=True, allow_none=False, metadata={"description": "Request ID"})
     listenerSet = fields.Nested(
         ListenerResponseSchema,
         many=True,
         required=True,
         allow_none=False,
-        description="List of listener definitions",
+        metadata={"description": "List of listener definitions"},
     )
-    listenerTotal = fields.Integer(required=True, example="", description="Total number of listeners")
+    listenerTotal = fields.Integer(required=True, metadata={"description": "Total number of listeners"})
     nextToken = fields.String(
         required=True,
-        description="The token to use to retrieve the next page of results. " "This value is null",
+        metadata={"description": "The token to use to retrieve the next page of results. " "This value is null"},
     )
 
 
 class DescribeListenersResponseSchema(Schema):
     DescribeListenersResponse = fields.Nested(
-        DescribeListenerResponse1Schema, required=True, many=False, allow_none=False
+        DescribeListenerResponse1Schema,
+        required=True,
+        many=False,
+        allow_none=False,
     )
 
 
@@ -1390,38 +1468,42 @@ class DescribeListenersRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="owner-id.N",
-        description="Account ID of the listener owner",
+        metadata={"description": "Account ID of the listener owner"},
     )
-    ListenerName = fields.String(required=False, context="query", description="The user-supplied listener name")
+    ListenerName = fields.String(
+        required=False,
+        context="query",
+        metadata={"description": "The user-supplied listener name"},
+    )
     ListenerId_N = fields.List(
         fields.String(),
         required=False,
         allow_none=True,
         context="query",
         collection_format="multi",
-        description="One or more listener IDs",
         data_key="ListenerId.N",
+        metadata={"description": "One or more listener IDs"},
     )
     MaxResults = fields.Integer(
         required=False,
-        default=10,
-        description="Number of results per page",
+        dump_default=10,
         data_key="MaxResults",
         context="query",
+        metadata={"description": "Number of results per page"},
     )
     NextToken = fields.String(
         required=False,
-        default="0",
-        description="Page number",
+        dump_default="0",
         data_key="Nvl-NextToken",
         context="query",
+        metadata={"description": "Page number"},
     )
 
 
 class DescribeListeners(ServiceApiView):
     summary = "Describe listener"
     description = "Describe listener"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {"DescribeListenersResponseSchema": DescribeListenersResponseSchema}
     parameters = SwaggerHelper().get_parameters(DescribeListenersRequestSchema)
     parameters_schema = DescribeListenersRequestSchema
@@ -1477,13 +1559,13 @@ class DescribeListeners(ServiceApiView):
 
 
 class CreateListenerResponse2Schema(Schema):
-    listenerId = fields.String(required=True, allow_none=False, description="The ID of the listener")
+    listenerId = fields.String(required=True, allow_none=False, metadata={"description": "The ID of the listener"})
 
 
 class CreateListenerResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
     Listener = fields.Nested(CreateListenerResponse2Schema, required=True, allow_none=False)
-    requestId = fields.String(required=True, allow_none=True, description="Request ID")
+    requestId = fields.String(required=True, allow_none=True, metadata={"description": "Request ID"})
 
 
 class CreateListenerResponseSchema(Schema):
@@ -1493,54 +1575,65 @@ class CreateListenerResponseSchema(Schema):
 class CreateListenerParamsRequestSchema(Schema):
     owner_id = fields.String(
         required=True,
-        example="account-1",
-        description="The account ID",
         data_key="owner-id",
+        metadata={"example": "account-1", "description": "The account ID"},
     )
-    Name = fields.String(required=True, allow_none=False, description="The name of the listener")
-    Description = fields.String(required=False, allow_none=True, description="A description for the listener")
+    Name = fields.String(required=True, allow_none=False, metadata={"description": "The name of the listener"})
+    Description = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={"description": "A description for the listener"},
+    )
     TrafficType = fields.String(
         required=True,
         allow_none=False,
         validate=OneOf(["tcp", "http", "ssl-passthrough", "https-offloading", "https-end-to-end"]),
-        description="The way the load balancer " "processes the traffic directed to destination servers",
+        metadata={"description": "The way the load balancer " "processes the traffic directed to destination servers"},
     )
     Persistence = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["sourceip", "cookie", "ssl-sessionid"]),
-        description="Load balancer persistence criteria",
+        metadata={"description": "Load balancer persistence criteria"},
     )
     CookieName = fields.String(
         required=False,
         allow_none=True,
-        description="The name of the cookie when cookie-based " "persistence is adopted",
+        metadata={"description": "The name of the cookie when cookie-based " "persistence is adopted"},
     )
     CookieMode = fields.String(
         required=False,
         allow_none=True,
-        description="The way the load balancer manages cookie-based persistence",
+        metadata={"description": "The way the load balancer manages cookie-based persistence"},
     )
     ExpireTime = fields.Integer(
         required=False,
         allow_none=True,
-        description="Persistence expiration time in seconds",
+        metadata={"description": "Persistence expiration time in seconds"},
     )
-    ClientCertificate = fields.String(required=False, allow_none=True, description="Client certificate")
-    ServerCertificate = fields.String(required=False, allow_none=True, description="Server certificate")
-    ClientCipher = fields.String(required=False, allow_none=True, description="Cipher suite used by client")
-    ServerCipher = fields.String(required=False, allow_none=True, description="Cipher suite used by server")
+    ClientCertificate = fields.String(required=False, allow_none=True, metadata={"description": "Client certificate"})
+    ServerCertificate = fields.String(required=False, allow_none=True, metadata={"description": "Server certificate"})
+    ClientCipher = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={"description": "Cipher suite used by client"},
+    )
+    ServerCipher = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={"description": "Cipher suite used by server"},
+    )
     InsertXForwardedFor = fields.Boolean(
         required=False,
         allow_none=True,
-        description="A flag to instruct load "
+        metadata={"description": "A flag to instruct load "
         "balancer to append X-Forwarded-For header in the requests to the backend "
-        "servers",
+        "servers"},
     )
     URLRedirect = fields.String(
         required=False,
         allow_none=True,
-        description="The URL to redirect client requests",
+        metadata={"description": "The URL to redirect client requests"},
     )
     ListenerTemplate = NotEmptyString(required=False, allow_none=True, description="Listener template")
 
@@ -1604,7 +1697,7 @@ class CreateListenerBodyRequestSchema(Schema):
 class CreateListener(ServiceApiView):
     summary = "Create listener"
     description = "Create listener"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "CreateListenerRequestSchema": CreateListenerRequestSchema,
         "CreateListenerResponseSchema": CreateListenerResponseSchema,
@@ -1655,61 +1748,76 @@ class CreateListener(ServiceApiView):
 
 class ModifyListenerResponseItemSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, description="The ID of the request")
-    listenerId = fields.String(required=True, description="The ID of the service")
+    requestId = fields.String(required=True, metadata={"description": "The ID of the request"})
+    listenerId = fields.String(required=True, metadata={"description": "The ID of the service"})
 
 
 class ModifyListenerResponseSchema(Schema):
     ModifyListenerResponse = fields.Nested(
-        ModifyListenerResponseItemSchema, required=True, many=False, allow_none=False
+        ModifyListenerResponseItemSchema,
+        required=True,
+        many=False,
+        allow_none=False,
     )
 
 
 class ModifyListenerRequest1Schema(Schema):
-    listenerId = fields.String(required=True, allow_none=False, description="The ID of the listener")
-    Description = fields.String(required=False, allow_none=True, description="A description for the listener")
+    listenerId = fields.String(required=True, allow_none=False, metadata={"description": "The ID of the listener"})
+    Description = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={"description": "A description for the listener"},
+    )
     TrafficType = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["tcp", "http", "ssl-passthrough", "https-offloading", "https-end-to-end"]),
-        description="The way the load balancer " "processes the traffic directed to destination servers",
+        metadata={"description": "The way the load balancer " "processes the traffic directed to destination servers"},
     )
     Persistence = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["sourceip", "cookie", "ssl-sessionid"]),
-        description="Load balancer persistence criteria",
+        metadata={"description": "Load balancer persistence criteria"},
     )
     CookieName = fields.String(
         required=False,
         allow_none=True,
-        description="The name of the cookie when cookie-based " "persistence is adopted",
+        metadata={"description": "The name of the cookie when cookie-based " "persistence is adopted"},
     )
     CookieMode = fields.String(
         required=False,
         allow_none=True,
-        description="The way the load balancer manages cookie-based persistence",
+        metadata={"description": "The way the load balancer manages cookie-based persistence"},
     )
     ExpireTime = fields.Integer(
         required=False,
         allow_none=True,
-        description="Persistence expiration time in seconds",
+        metadata={"description": "Persistence expiration time in seconds"},
     )
-    ClientCertificate = fields.String(required=False, allow_none=True, description="Client certificate")
-    ServerCertificate = fields.String(required=False, allow_none=True, description="Server certificate")
-    ClientCipher = fields.String(required=False, allow_none=True, description="Cipher suite used by client")
-    ServerCipher = fields.String(required=False, allow_none=True, description="Cipher suite used by server")
+    ClientCertificate = fields.String(required=False, allow_none=True, metadata={"description": "Client certificate"})
+    ServerCertificate = fields.String(required=False, allow_none=True, metadata={"description": "Server certificate"})
+    ClientCipher = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={"description": "Cipher suite used by client"},
+    )
+    ServerCipher = fields.String(
+        required=False,
+        allow_none=True,
+        metadata={"description": "Cipher suite used by server"},
+    )
     InsertXForwardedFor = fields.Boolean(
         required=False,
         allow_none=True,
-        description="A flag to instruct load "
+        metadata={"description": "A flag to instruct load "
         "balancer to append X-Forwarded-For header in the requests to the backend "
-        "servers",
+        "servers"},
     )
     URLRedirect = fields.String(
         required=False,
         allow_none=True,
-        description="The URL to redirect client requests",
+        metadata={"description": "The URL to redirect client requests"},
     )
 
 
@@ -1724,7 +1832,7 @@ class ModifyListenerBodyRequestSchema(Schema):
 class ModifyListener(ServiceApiView):
     summary = "Modify listener"
     description = "Modify listener"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "ModifyListenerRequestSchema": ModifyListenerRequestSchema,
         "ModifyListenerResponseSchema": ModifyListenerResponseSchema,
@@ -1752,13 +1860,16 @@ class ModifyListener(ServiceApiView):
 
 class DeleteListenerResponseItemSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, description="The ID of the request")
-    nvl_return = fields.Boolean(required=True, example=True, data_key="return")
+    requestId = fields.String(required=True, metadata={"description": "The ID of the request"})
+    nvl_return = fields.Boolean(required=True, data_key="return", metadata={"example": True})
 
 
 class DeleteListenerResponseSchema(Schema):
     DeleteListenerResponse = fields.Nested(
-        DeleteListenerResponseItemSchema, required=True, many=False, allow_none=False
+        DeleteListenerResponseItemSchema,
+        required=True,
+        many=False,
+        allow_none=False,
     )
 
 
@@ -1766,8 +1877,7 @@ class DeleteListenerRequestSchema(Schema):
     listenerId = fields.String(
         required=True,
         context="query",
-        example="listener-896478",
-        description="The ID of the listener",
+        metadata={"example": "listener-896478", "description": "The ID of the listener"},
     )
 
 
@@ -1778,7 +1888,7 @@ class DeleteListenerBodyRequestSchema(Schema):
 class DeleteListener(ServiceApiView):
     summary = "Delete listener"
     description = "Delete listener"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "DeleteListenerRequestSchema": DeleteListenerRequestSchema,
         "DeleteListenerResponseSchema": DeleteListenerResponseSchema,
@@ -1808,15 +1918,15 @@ class DeleteListener(ServiceApiView):
 # Load Balancer
 #
 class LoadBalancerAttachedListenerResponseSchema(Schema):
-    id = fields.String(required=True, description="Listener ID")
-    name = fields.String(required=True, description="Listener name")
-    state = fields.String(required=True, description="Listener state")
+    id = fields.String(required=True, metadata={"description": "Listener ID"})
+    name = fields.String(required=True, metadata={"description": "Listener name"})
+    state = fields.String(required=True, metadata={"description": "Listener state"})
 
 
 class LoadBalancerAttachedTargetGroupResponseSchema(Schema):
-    id = fields.String(required=True, description="Target group ID")
-    name = fields.String(required=True, description="Target group name")
-    state = fields.String(required=True, description="Target group state")
+    id = fields.String(required=True, metadata={"description": "Target group ID"})
+    name = fields.String(required=True, metadata={"description": "Target group name"})
+    state = fields.String(required=True, metadata={"description": "Target group state"})
 
 
 class LoadBalancerAttachmentSetResponseSchema(Schema):
@@ -1824,68 +1934,68 @@ class LoadBalancerAttachmentSetResponseSchema(Schema):
         LoadBalancerAttachedListenerResponseSchema,
         required=True,
         allow_none=True,
-        description="Attached listener",
+        metadata={"description": "Attached listener"},
     )
     TargetGroup = fields.Nested(
         LoadBalancerAttachedTargetGroupResponseSchema,
         required=True,
         allow_none=True,
-        description="Attached target group",
+        metadata={"description": "Attached target group"},
     )
 
 
 class LoadBalancerResponseSchema(Schema):
     tagSet = fields.Nested(TagResponseSchema, many=True, required=False, allow_none=True)
-    name = fields.String(required=True, description="The name of the health monitor")
-    vpcId = fields.String(required=True, description="ID of the VPC")
-    subnetId = fields.String(required=True, description="ID of the subnet")
+    name = fields.String(required=True, metadata={"description": "The name of the health monitor"})
+    vpcId = fields.String(required=True, metadata={"description": "ID of the VPC"})
+    subnetId = fields.String(required=True, metadata={"description": "ID of the subnet"})
     protocol = fields.String(
         required=True,
-        description="The protocol for connections from clients to load balancer",
+        metadata={"description": "The protocol for connections from clients to load balancer"},
     )
-    virtualIP = fields.String(required=True, description="Virtual IP exposed by load balancer")
+    virtualIP = fields.String(required=True, metadata={"description": "Virtual IP exposed by load balancer"})
     isVIPStatic = fields.String(
         required=True,
-        description="True if the load balancer frontend IP address has been "
-        "provided by the user as input parameter; False otherwise",
+        metadata={"description": "True if the load balancer frontend IP address has been "
+        "provided by the user as input parameter; False otherwise"},
     )
-    port = fields.Integer(required=True, description="The port on which the load balancer is listening")
-    maxConn = fields.Integer(required=False, description="Maximum concurrent connections")
-    maxConnRate = fields.Integer(required=False, description="Maximum incoming connection requests per second")
+    port = fields.Integer(required=True, metadata={"description": "The port on which the load balancer is listening"})
+    maxConn = fields.Integer(required=False, metadata={"description": "Maximum concurrent connections"})
+    maxConnRate = fields.Integer(
+        required=False,
+        metadata={"description": "Maximum incoming connection requests per second"},
+    )
     nvl_resourceId = fields.String(
         required=False,
         allow_none=True,
-        example="",
-        description="The ID of the instance resource",
         data_key="nvl-resourceId",
+        metadata={"description": "The ID of the instance resource"},
     )
     attachmentSet = fields.Nested(
         LoadBalancerAttachmentSetResponseSchema,
         required=True,
-        description="Listener and target group attached to the load balancer",
+        metadata={"description": "Listener and target group attached to the load balancer"},
     )
 
 
 class DescribeLoadBalancersResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, allow_none=False, description="Request ID")
+    requestId = fields.String(required=True, allow_none=False, metadata={"description": "Request ID"})
     loadBalancerSet = fields.Nested(
         LoadBalancerResponseSchema,
         many=True,
         required=True,
         allow_none=False,
-        description="List of load balancer definitions",
+        metadata={"description": "List of load balancer definitions"},
     )
     nvl_loadBalancerTotal = fields.Integer(
         required=True,
-        example="",
-        description="Total number of load balancers",
         data_key="nvl-loadBalancerTotal",
+        metadata={"description": "Total number of load balancers"},
     )
     nextToken = fields.String(
         required=True,
-        example="ednundw83ldw",
-        description="The token to use to retrieve the " "next page of results. This value is null",
+        metadata={"example": "ednundw83ldw", "description": "The token to use to retrieve the " "next page of results. This value is null"},
     )
 
 
@@ -1906,12 +2016,12 @@ class DescribeLoadBalancersRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="owner-id.N",
-        description="Account ID of the target group owner",
+        metadata={"description": "Account ID of the target group owner"},
     )
     LoadBalancerName = fields.String(
         required=False,
         context="query",
-        description="The user-supplied load balancer name",
+        metadata={"description": "The user-supplied load balancer name"},
     )
     LoadBalancerId_N = fields.List(
         fields.String(),
@@ -1920,28 +2030,28 @@ class DescribeLoadBalancersRequestSchema(Schema):
         context="query",
         collection_format="multi",
         data_key="LoadBalancerId.N",
-        description="The names of the load balancers",
+        metadata={"description": "The names of the load balancers"},
     )
     MaxResults = fields.Integer(
         required=False,
-        default=10,
-        description="Number of results per page",
+        dump_default=10,
         data_key="MaxResults",
         context="query",
+        metadata={"description": "Number of results per page"},
     )
     NextToken = fields.String(
         required=False,
-        default="0",
-        description="Page number",
+        dump_default="0",
         data_key="Nvl-NextToken",
         context="query",
+        metadata={"description": "Page number"},
     )
 
 
 class DescribeLoadBalancers(ServiceApiView):
     summary = "Describe load balancers"
     description = "Describe load balancers"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {"DescribeLoadBalancersResponseSchema": DescribeLoadBalancersResponseSchema}
     parameters = SwaggerHelper().get_parameters(DescribeLoadBalancersRequestSchema)
     parameters_schema = DescribeLoadBalancersRequestSchema
@@ -1997,7 +2107,11 @@ class DescribeLoadBalancers(ServiceApiView):
 
 
 class CreateLoadBalancerResponse2Schema(Schema):
-    loadBalancerId = fields.String(required=True, allow_none=False, description="The ID of the load balancer")
+    loadBalancerId = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The ID of the load balancer"},
+    )
     # attachmentSet = fields.Nested(LoadBalancersAttachmentSetResponseSchema, required=True, description='Any listener '
     #                               'and target group attached to the load balancer')
     # tagSet = fields.Nested(TagResponseSchema, many=True, required=False, allow_none=True, description='Any tags '
@@ -2006,7 +2120,7 @@ class CreateLoadBalancerResponse2Schema(Schema):
 
 class CreateLoadBalancerResponse1Schema(Schema):
     LoadBalancer = fields.Nested(CreateLoadBalancerResponse2Schema, required=True, allow_none=False)
-    requestId = fields.String(required=True, allow_none=True, description="Request ID")
+    requestId = fields.String(required=True, allow_none=True, metadata={"description": "Request ID"})
 
 
 class CreateLoadBalancerResponseSchema(Schema):
@@ -2014,48 +2128,52 @@ class CreateLoadBalancerResponseSchema(Schema):
 
 
 class CreateLoadBalancerParamsRequestSchema(Schema):
-    owner_id = fields.String(required=True, description="The account ID", data_key="owner-id")
-    Name = fields.String(required=True, allow_none=False, description="The name of the load balancer")
+    owner_id = fields.String(required=True, data_key="owner-id", metadata={"description": "The account ID"})
+    Name = fields.String(required=True, allow_none=False, metadata={"description": "The name of the load balancer"})
     Description = fields.String(
         required=False,
         allow_none=True,
-        description="A description for the load balancer",
+        metadata={"description": "A description for the load balancer"},
     )
     Template = fields.String(
         required=True,
         allow_none=False,
-        description="Load balancer template or service definition",
+        metadata={"description": "Load balancer template or service definition"},
     )
     Protocol = fields.String(
         required=True,
         allow_none=False,
         validate=OneOf(["HTTP", "HTTPS"]),
-        description="The protocol for connections from clients to load balancer",
+        metadata={"description": "The protocol for connections from clients to load balancer"},
     )
     StaticIP = fields.String(
         required=False,
         allow_none=True,
-        description="The frontend IP address of the load "
-        "balancer provided by the user and not determined by the orchestration system",
+        metadata={"description": "The frontend IP address of the load "
+        "balancer provided by the user and not determined by the orchestration system"},
     )
     Port = fields.Integer(
         required=True,
         allow_none=False,
-        description="The port on which the load balancer is listening",
+        metadata={"description": "The port on which the load balancer is listening"},
     )
-    Listener = fields.String(required=True, allow_none=False, description="ID of the listener")
-    TargetGroup = fields.String(required=True, allow_none=False, description="ID of the target group")
-    MaxConnections = fields.Integer(required=False, allow_none=True, description="Maximum concurrent connections")
+    Listener = fields.String(required=True, allow_none=False, metadata={"description": "ID of the listener"})
+    TargetGroup = fields.String(required=True, allow_none=False, metadata={"description": "ID of the target group"})
+    MaxConnections = fields.Integer(
+        required=False,
+        allow_none=True,
+        metadata={"description": "Maximum concurrent connections"},
+    )
     MaxConnectionRate = fields.Integer(
         required=False,
         allow_none=True,
-        description="Maximum incoming connection requests per second",
+        metadata={"description": "Maximum incoming connection requests per second"},
     )
     DeploymentEnvironment = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["prod", "preprod", "stage", "test"]),
-        description="The environment where the project hosted on target(s) behind the load balancer is deployed",
+        metadata={"description": "The environment where the project hosted on target(s) behind the load balancer is deployed"},
     )
 
 
@@ -2070,7 +2188,7 @@ class CreateLoadBalancerBodyRequestSchema(Schema):
 class CreateLoadBalancer(ServiceApiView):
     summary = "Create load balancer"
     description = "Create load balancer"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "CreateLoadBalancerRequestSchema": CreateLoadBalancerRequestSchema,
         "CreateLoadBalancerResponseSchema": CreateLoadBalancerResponseSchema,
@@ -2128,13 +2246,17 @@ class CreateLoadBalancer(ServiceApiView):
 
 
 class ImportLoadBalancerResponse2Schema(Schema):
-    loadBalancerId = fields.String(required=True, allow_none=False, description="The ID of the load balancer")
+    loadBalancerId = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The ID of the load balancer"},
+    )
 
 
 class ImportLoadBalancerResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
     LoadBalancer = fields.Nested(ImportLoadBalancerResponse2Schema, required=True, allow_none=False)
-    requestId = fields.String(required=True, allow_none=True, description="Request ID")
+    requestId = fields.String(required=True, allow_none=True, metadata={"description": "Request ID"})
 
 
 class ImportLoadBalancerResponseSchema(Schema):
@@ -2142,57 +2264,57 @@ class ImportLoadBalancerResponseSchema(Schema):
 
 
 class ImportLoadBalancerParamsRequestSchema(Schema):
-    owner_id = fields.String(required=True, description="The account ID", data_key="owner-id")
-    Name = fields.String(required=True, allow_none=False, description="The name of the target group")
+    owner_id = fields.String(required=True, data_key="owner-id", metadata={"description": "The account ID"})
+    Name = fields.String(required=True, allow_none=False, metadata={"description": "The name of the target group"})
     Description = fields.String(
         required=False,
         allow_none=True,
-        description="A description for the target group",
+        metadata={"description": "A description for the target group"},
     )
     Template = fields.String(
         required=True,
         allow_none=False,
-        description="Load balancer template or service definition",
+        metadata={"description": "Load balancer template or service definition"},
     )
     Protocol = fields.String(
         required=True,
         allow_none=False,
         validate=OneOf(["HTTP", "HTTPS"]),
-        description="The protocol for connections from clients to load balancer",
+        metadata={"description": "The protocol for connections from clients to load balancer"},
     )
     VirtualIpAddress = fields.String(
         required=False,
         allow_none=True,
-        description="The frontend IP address of the load balancer",
+        metadata={"description": "The frontend IP address of the load balancer"},
     )
     isVIPStatic = fields.Boolean(
         required=False,
         allow_none=True,
-        description="whether the frontend IP address is static or not",
+        metadata={"description": "whether the frontend IP address is static or not"},
     )
     Port = fields.Integer(
         required=True,
         allow_none=False,
-        description="The port on which the load balancer is listening",
+        metadata={"description": "The port on which the load balancer is listening"},
     )
-    Listener = fields.String(required=True, allow_none=False, description="ID of the listener")
-    TargetGroup = fields.String(required=True, allow_none=False, description="ID of the target group")
-    MaxConnections = fields.Integer(required=False, allow_none=True, description="Maximum concurrent connections")
+    Listener = fields.String(required=True, allow_none=False, metadata={"description": "ID of the listener"})
+    TargetGroup = fields.String(required=True, allow_none=False, metadata={"description": "ID of the target group"})
+    MaxConnections = fields.Integer(
+        required=False,
+        allow_none=True,
+        metadata={"description": "Maximum concurrent connections"},
+    )
     MaxConnectionRate = fields.Integer(
         required=False,
         allow_none=True,
-        description="Maximum incoming connection requests per second",
+        metadata={"description": "Maximum incoming connection requests per second"},
     )
-    ResourceId = fields.String(
-        required=True,
-        allow_none=False,
-        description="The id of the resource",
-    )
+    ResourceId = fields.String(required=True, allow_none=False, metadata={"description": "The id of the resource"})
     DeploymentEnvironment = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["prod", "preprod", "stage", "test"]),
-        description="The environment where the project hosted on target(s) behind the load balancer is deployed",
+        metadata={"description": "The environment where the project hosted on target(s) behind the load balancer is deployed"},
     )
 
 
@@ -2207,7 +2329,7 @@ class ImportLoadBalancerBodyRequestSchema(Schema):
 class ImportLoadBalancer(ServiceApiView):
     summary = "import load balancer"
     description = "import load balancer"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "ImportLoadBalancerRequestSchema": ImportLoadBalancerRequestSchema,
         "ImportLoadBalancerResponseSchema": ImportLoadBalancerResponseSchema,
@@ -2275,44 +2397,55 @@ class ImportLoadBalancer(ServiceApiView):
 
 
 class ModifyLoadBalancerResponse2Schema(Schema):
-    loadBalancerId = fields.String(required=True, description="The ID of the service")
+    loadBalancerId = fields.String(required=True, metadata={"description": "The ID of the service"})
 
 
 class ModifyLoadBalancerResponse1Schema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, allow_none=True, description="Request ID")
+    requestId = fields.String(required=True, allow_none=True, metadata={"description": "Request ID"})
     LoadBalancer = fields.Nested(ModifyLoadBalancerResponse2Schema, required=True, allow_none=False)
 
 
 class ModifyLoadBalancerResponseSchema(Schema):
     ModifyLoadBalancerResponse = fields.Nested(
-        ModifyLoadBalancerResponse1Schema, required=True, many=False, allow_none=False
+        ModifyLoadBalancerResponse1Schema,
+        required=True,
+        many=False,
+        allow_none=False,
     )
 
 
 class ModifyLoadBalancerRequest1Schema(Schema):
-    loadBalancerId = fields.String(required=True, allow_none=False, description="The ID of the load balancer")
+    loadBalancerId = fields.String(
+        required=True,
+        allow_none=False,
+        metadata={"description": "The ID of the load balancer"},
+    )
     Description = fields.String(
         required=False,
         allow_none=True,
-        description="A description for the target group",
+        metadata={"description": "A description for the target group"},
     )
     Protocol = fields.String(
         required=False,
         allow_none=True,
         validate=OneOf(["HTTP", "HTTPS"]),
-        description="The protocol for connections from clients to load balancer",
+        metadata={"description": "The protocol for connections from clients to load balancer"},
     )
     Port = fields.Integer(
         required=False,
         allow_none=True,
-        description="The port on which the load balancer is listening",
+        metadata={"description": "The port on which the load balancer is listening"},
     )
-    MaxConnections = fields.Integer(required=False, allow_none=True, description="Maximum concurrent connections")
+    MaxConnections = fields.Integer(
+        required=False,
+        allow_none=True,
+        metadata={"description": "Maximum concurrent connections"},
+    )
     MaxConnectionRate = fields.Integer(
         required=False,
         allow_none=True,
-        description="Maximum incoming connection requests per second",
+        metadata={"description": "Maximum incoming connection requests per second"},
     )
 
 
@@ -2327,7 +2460,7 @@ class ModifyLoadBalancerBodyRequestSchema(Schema):
 class ModifyLoadBalancer(ServiceApiView):
     summary = "Modify load balancer"
     description = "Modify load balancer"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "ModifyLoadBalancerRequestSchema": ModifyLoadBalancerRequestSchema,
         "ModifyLoadBalancerResponseSchema": ModifyLoadBalancerResponseSchema,
@@ -2363,14 +2496,12 @@ class DeleteLoadBalancerRequestSchema(Schema):
     loadBalancerId = fields.String(
         required=True,
         context="query",
-        example="load-balancer-896478",
-        description="The ID of the load balancer",
+        metadata={"example": "load-balancer-896478", "description": "The ID of the load balancer"},
     )
     no_linked_objs = fields.Boolean(
         required=False,
         context="query",
-        example="False",
-        description="A flag to avoid deletion of listener and target group linked to load balancer",
+        metadata={"example": "False", "description": "A flag to avoid deletion of listener and target group linked to load balancer"},
     )
 
 
@@ -2381,7 +2512,7 @@ class DeleteLoadBalancerBodyRequestSchema(Schema):
 class DeleteLoadBalancer(ServiceApiView):
     summary = "Delete load balancer"
     description = "Delete load balancer"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "DeleteLoadBalancerRequestSchema": DeleteLoadBalancerRequestSchema,
         "DeleteLoadBalancerResponseSchema": DeleteLoadBalancerResponseSchema,
@@ -2411,18 +2542,17 @@ class DeleteLoadBalancer(ServiceApiView):
 
 class EnableLoadBalancerResultResponseSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, allow_none=True, description="Request ID")
+    requestId = fields.String(required=True, allow_none=True, metadata={"description": "Request ID"})
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="True if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "True if the request succeeds, and an error otherwise"},
     )
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -2436,13 +2566,13 @@ class EnableLoadBalancerResponseSchema(Schema):
 
 
 class EnableLoadBalancerRequestSchema(Schema):
-    loadBalancerId = fields.String(required=True, context="query", description="Load balancer identifier")
+    loadBalancerId = fields.String(required=True, context="query", metadata={"description": "Load balancer identifier"})
 
 
 class EnableLoadBalancer(ServiceApiView):
     summary = "Enable load balancer service"
     description = "Enable load balancer service"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "EnableLoadBalancerRequestSchema": EnableLoadBalancerRequestSchema,
         "EnableLoadBalancerResponseSchema": EnableLoadBalancerResponseSchema,
@@ -2473,18 +2603,17 @@ class EnableLoadBalancer(ServiceApiView):
 
 class DisableLoadBalancerResultResponseSchema(Schema):
     xmlns = fields.String(required=False, data_key="__xmlns")
-    requestId = fields.String(required=True, allow_none=True, description="Request ID")
+    requestId = fields.String(required=True, allow_none=True, metadata={"description": "Request ID"})
     return_status = fields.Boolean(
         required=True,
-        example=True,
         data_key="return",
-        description="True if the request succeeds, and an error otherwise",
+        metadata={"example": True, "description": "True if the request succeeds, and an error otherwise"},
     )
     nvl_activeTask = fields.String(
         required=True,
         allow_none=True,
         data_key="nvl-activeTask",
-        description="active task id",
+        metadata={"description": "active task id"},
     )
 
 
@@ -2498,13 +2627,13 @@ class DisableLoadBalancerResponseSchema(Schema):
 
 
 class DisableLoadBalancerRequestSchema(Schema):
-    loadBalancerId = fields.String(required=True, context="query", description="Load balancer identifier")
+    loadBalancerId = fields.String(required=True, context="query", metadata={"description": "Load balancer identifier"})
 
 
 class DisableLoadBalancer(ServiceApiView):
     summary = "Disable load balancer service"
     description = "Disable load balancer service"
-    tags = ["networkservice"]
+    tags = [SwaggerTAG]
     definitions = {
         "DisableLoadBalancerRequestSchema": DisableLoadBalancerRequestSchema,
         "DisableLoadBalancerResponseSchema": DisableLoadBalancerResponseSchema,
